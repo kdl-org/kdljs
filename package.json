@@ -17,12 +17,12 @@
   "author": "Lars Willighagen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/larsgw/kdl-js/issues"
+    "url": "https://github.com/kdl-org/kdljs/issues"
   },
-  "homepage": "https://github.com/larsgw/kdl-js#readme",
+  "homepage": "https://github.com/kdl-org/kdljs#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/larsgw/kdl-js.git"
+    "url": "git+https://github.com/kdl-org/kdljs.git"
   },
   "dependencies": {
     "chevrotain": "^7.0.3"
