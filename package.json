@@ -2,7 +2,7 @@
   "name": "kdl-js",
   "version": "0.0.0",
   "description": "KDL parser and serializer.",
-  "main": "lib/index.js",
+  "main": "index.js",
   "scripts": {},
   "keywords": [
     "kdl",

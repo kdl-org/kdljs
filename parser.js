@@ -307,3 +307,7 @@ module.exports.parse = function parse (text) {
     errors: parser.errors
   }
 }
+
+module.exports.lexer = lexer
+module.exports.parser = parser
+module.exports.KdlParser = KdlParser
