@@ -1,6 +1,6 @@
 {
   "name": "kdljs",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "KDL parser and serializer.",
   "main": "index.js",
   "scripts": {
