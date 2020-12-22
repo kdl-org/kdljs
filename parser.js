@@ -8,15 +8,18 @@ const {
 // Whitespace and comments
 const WhiteSpace = createToken({
   name: 'WhiteSpace',
+  // eslint-disable-next-line no-control-regex
   pattern: /[\x09\x20\xA0\u1680\u2000-\u200A\u202F\u205F\u3000]+/
 })
 const NewLine = createToken({
   name: 'NewLine',
+  // eslint-disable-next-line no-control-regex
   pattern: /\x0D\x0A|[\x0A\x0C\x85\u2028\u2029]/
 })
 const BlockComment = createToken({ name: 'BlockComment', pattern: /\/-/ })
 const LineComment = createToken({
   name: 'LineComment',
+  // eslint-disable-next-line no-control-regex
   pattern: /\/\/[^]*?(\x0D\x0A|[\x0A\x0C\x85\u2028\u2029])/,
   line_breaks: true
 })
@@ -30,7 +33,8 @@ const MultiLineComment = createToken({
 const Boolean = createToken({ name: 'Boolean', pattern: /true|false/ })
 const Null = createToken({ name: 'Null', pattern: /null/ })
 const RawString = createToken({
-  name: 'RawString', pattern: /r(#*)"[^]*?"\1/,
+  name: 'RawString',
+  pattern: /r(#*)"[^]*?"\1/,
   line_breaks: true
 })
 const Float = createToken({
@@ -51,7 +55,7 @@ const SemiColon = createToken({ name: 'SemiColon', pattern: /;/ })
 const Equals = createToken({ name: 'Equals', pattern: /=/ })
 const LeftBrace = createToken({ name: 'LeftBrace', pattern: /\{/ })
 const RightBrace = createToken({ name: 'RightBrace', pattern: /\}/ })
-const EscLine = createToken({ name: 'EscLine', pattern: /\\/})
+const EscLine = createToken({ name: 'EscLine', pattern: /\\/ })
 
 // String
 const OpenQuote = createToken({ name: 'OpenQuote', pattern: /"/, push_mode: 'string' })
@@ -84,7 +88,7 @@ const tokens = {
       RightBrace,
       EscLine,
       OpenQuote,
-      Identifier,
+      Identifier
     ],
     string: [
       Unicode,
@@ -119,11 +123,13 @@ class KdlParser extends EmbeddedActionsParser {
       const nodes = []
 
       this.MANY(() => this.OR([
-        { ALT: () => {
-          this.CONSUME(BlockComment)
-          this.OPTION1(() => this.CONSUME1(WhiteSpace))
-          this.SUBRULE(this.node)
-        } },
+        {
+          ALT: () => {
+            this.CONSUME(BlockComment)
+            this.OPTION1(() => this.CONSUME1(WhiteSpace))
+            this.SUBRULE(this.node)
+          }
+        },
         { ALT: () => this.CONSUME(LineComment) },
         { ALT: () => this.CONSUME(MultiLineComment) },
         { ALT: () => this.CONSUME(WhiteSpace) },
@@ -199,44 +205,54 @@ class KdlParser extends EmbeddedActionsParser {
     this.RULE('nodeSpace', () => {
       this.MANY(() => this.OR([
         { ALT: () => this.CONSUME(WhiteSpace) },
-        { ALT: () => {
-          this.CONSUME(EscLine)
-          this.OPTION(() => this.CONSUME1(WhiteSpace))
-          this.OR1([
-            { ALT: () => this.CONSUME(LineComment) },
-            { ALT: () => this.CONSUME(NewLine) }
-          ])
-        } },
-        { ALT: () => {
-          this.CONSUME(BlockComment)
-          this.OPTION1(() => this.CONSUME2(WhiteSpace))
-          this.OR2([
-            {
-              GATE: this.BACKTRACK(this.property),
-              ALT: () => this.SUBRULE(this.property)
-            },
-            {
-              GATE: this.BACKTRACK(this.value),
-              ALT: () => this.SUBRULE(this.value)
-            },
-            { ALT: () => this.SUBRULE(this.nodeChildren) }
-          ])
-        } }
+        {
+          ALT: () => {
+            this.CONSUME(EscLine)
+            this.OPTION(() => this.CONSUME1(WhiteSpace))
+            this.OR1([
+              { ALT: () => this.CONSUME(LineComment) },
+              { ALT: () => this.CONSUME(NewLine) }
+            ])
+          }
+        },
+        {
+          ALT: () => {
+            this.CONSUME(BlockComment)
+            this.OPTION1(() => this.CONSUME2(WhiteSpace))
+            this.OR2([
+              {
+                GATE: this.BACKTRACK(this.property),
+                ALT: () => this.SUBRULE(this.property)
+              },
+              {
+                GATE: this.BACKTRACK(this.value),
+                ALT: () => this.SUBRULE(this.value)
+              },
+              { ALT: () => this.SUBRULE(this.nodeChildren) }
+            ])
+          }
+        }
       ]))
     })
 
     this.RULE('nodeTerminator', () => {
-      this.MANY(() => this.OR([
+      this.OR([
         { ALT: () => this.CONSUME(NewLine) },
-        { ALT: () => this.CONSUME(SemiColon) }
-      ]))
+        { ALT: () => this.CONSUME(SemiColon) },
+        { ALT: () => this.CONSUME(EOF) }
+      ])
     })
 
     this.RULE('value', () => this.OR([
       { ALT: () => this.SUBRULE(this.string) },
       { ALT: () => parseFloat(this.CONSUME(Float).image) },
       { ALT: () => this.CONSUME(Boolean).image === 'true' },
-      { ALT: () => (this.CONSUME(Null), null) },
+      {
+        ALT: () => {
+          this.CONSUME(Null)
+          return null
+        }
+      },
       {
         ALT: () => {
           const number = this.CONSUME(Integer).image.slice(1).replace(/_/g, '')
