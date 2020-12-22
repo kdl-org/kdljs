@@ -1,0 +1,29 @@
+{
+  "name": "kdl-js",
+  "version": "0.0.0",
+  "description": "KDL parser and serializer.",
+  "main": "lib/index.js",
+  "scripts": {},
+  "keywords": [
+    "kdl",
+    "parser",
+    "serializer"
+  ],
+  "author": "Lars Willighagen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/larsgw/kdl-js/issues"
+  },
+  "homepage": "https://github.com/larsgw/kdl-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/larsgw/kdl-js.git"
+  },
+  "dependencies": {
+    "chevrotain": "^7.0.3"
+  },
+  "devDependencies": {
+    "mocha": "^8.2.1",
+    "standard": "^16.0.3"
+  }
+}
