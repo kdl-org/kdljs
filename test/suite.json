@@ -1,0 +1,37 @@
+{
+  "value_number_decimal": [
+    { "name": "node", "values": [123456789] },
+    { "name": "node", "values": [-123456789] },
+    { "name": "node", "values": [12345678000000000] },
+    { "name": "node", "values": [12345678000000000] },
+    { "name": "node", "values": [-12345678000000000] },
+    { "name": "node", "values": [0.012345678] },
+    { "name": "node", "values": [-0.012345678] },
+    { "name": "node", "values": [1234.56789] },
+    { "name": "node", "values": [-1234.56789] },
+    { "name": "node", "values": [1234567800000] },
+    { "name": "node", "values": [-1234567800000] },
+    { "name": "node", "values": [0.0000012345678] },
+    { "name": "node", "values": [-0.0000012345678] }
+  ],
+  "value_number_other": [
+    { "name": "node", "values": [2] },
+    { "name": "node", "values": [100] },
+    { "name": "node", "values": [8] },
+    { "name": "node", "values": [100] },
+    { "name": "node", "values": [16] },
+    { "name": "node", "values": [100] }
+  ],
+  "value_number_separator": [
+    { "name": "node", "values": [123] },
+    { "name": "node", "values": [27] },
+    { "name": "node", "values": [83] },
+    { "name": "node", "values": [291] },
+    { "name": "node", "values": [1123581321] }
+  ],
+  "value_other": [
+    { "name": "node", "values": [true] },
+    { "name": "node", "values": [false] },
+    { "name": "node", "values": [null] }
+  ]
+}
