@@ -117,6 +117,9 @@ const radix = {
   x: 16
 }
 
+/**
+ * @class
+ */
 class KdlParser extends EmbeddedActionsParser {
   constructor () {
     super(tokens)
@@ -299,6 +302,14 @@ class KdlParser extends EmbeddedActionsParser {
     this.performSelfAnalysis()
   }
 
+  /**
+   * @method
+   * @param {string} input - Input KDL file (or fragment)
+   * @param {Object} error
+   * @param {string} [message] - Override the error message
+   * @param {Object} [options] - Further configuration
+   * @param {number} [options.context=3] - How many lines before the problematic line to include
+   */
   formatError (input, error, message = error.message, { context = 3 } = {}) {
     let output = message + '\n'
 
@@ -319,6 +330,9 @@ class KdlParser extends EmbeddedActionsParser {
 }
 
 const lexer = new Lexer(tokens)
+/**
+ * @constant {module:kdljs/parser~KdlParser}
+ */
 const parser = new KdlParser()
 
 /**
