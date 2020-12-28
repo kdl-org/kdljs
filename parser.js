@@ -245,12 +245,17 @@ class KdlParser extends EmbeddedActionsParser {
 
     this.RULE('value', () => this.OR([
       { ALT: () => this.SUBRULE(this.string) },
-      { ALT: () => parseFloat(this.CONSUME(Float).image) },
       { ALT: () => this.CONSUME(Boolean).image === 'true' },
       {
         ALT: () => {
           this.CONSUME(Null)
           return null
+        }
+      },
+      {
+        ALT: () => {
+          const number = this.CONSUME(Float).image.replace(/_/g, '')
+          return parseFloat(number)
         }
       },
       {
