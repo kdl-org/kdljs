@@ -255,7 +255,7 @@ class KdlParser extends EmbeddedActionsParser {
       {
         ALT: () => {
           const number = this.CONSUME(Float).image.replace(/_/g, '')
-          return parseFloat(number)
+          return parseFloat(number, 10)
         }
       },
       {
