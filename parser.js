@@ -1,3 +1,5 @@
+/** @module kdljs/parser */
+
 const {
   createToken,
   Lexer,
@@ -319,7 +321,19 @@ class KdlParser extends EmbeddedActionsParser {
 const lexer = new Lexer(tokens)
 const parser = new KdlParser()
 
-module.exports.parse = function parse (text) {
+/**
+ * @typedef parseResult
+ * @type {Object}
+ * @property {Array} errors - Parsing errors
+ * @property {module:kdljs~Document} output - KDL Document
+ */
+
+/**
+ * @function parse
+ * @param {string} text - Input KDL file (or fragment)
+ * @return {module:kdljs/parser~parseResult} Output
+ */
+ module.exports.parse = function parse (text) {
   parser.input = lexer.tokenize(text).tokens
   const output = parser.nodes()
 
