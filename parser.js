@@ -333,7 +333,7 @@ const parser = new KdlParser()
  * @param {string} text - Input KDL file (or fragment)
  * @return {module:kdljs/parser~parseResult} Output
  */
- module.exports.parse = function parse (text) {
+module.exports.parse = function parse (text) {
   parser.input = lexer.tokenize(text).tokens
   const output = parser.nodes()
 
