@@ -112,7 +112,7 @@ const escapes = {
 const radix = {
   b: 2,
   o: 8,
-  h: 16
+  x: 16
 }
 
 class KdlParser extends EmbeddedActionsParser {
