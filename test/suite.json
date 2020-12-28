@@ -1,12 +1,17 @@
 {
   "value_number_decimal": [
     { "name": "node", "values": [123456789] },
+    { "name": "node", "values": [123456789] },
+    { "name": "node", "values": [-123456789] },
+    { "name": "node", "values": [123456789] },
+    { "name": "node", "values": [123456789] },
     { "name": "node", "values": [-123456789] },
     { "name": "node", "values": [12345678000000000] },
     { "name": "node", "values": [12345678000000000] },
     { "name": "node", "values": [-12345678000000000] },
     { "name": "node", "values": [0.012345678] },
     { "name": "node", "values": [-0.012345678] },
+    { "name": "node", "values": [1234.56789] },
     { "name": "node", "values": [1234.56789] },
     { "name": "node", "values": [-1234.56789] },
     { "name": "node", "values": [1234567800000] },
