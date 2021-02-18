@@ -3,6 +3,7 @@
   "version": "0.0.2",
   "description": "KDL parser and serializer.",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "lint": "standard",
     "test": "mocha --throw-deprecation test/spec.js",
