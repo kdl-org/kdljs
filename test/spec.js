@@ -4,7 +4,7 @@ const assert = require('assert')
 const path = require('path')
 const fs = require('fs')
 const suite = require('./suite.json')
-const parse = require('../')
+const { parse } = require('../')
 
 function getInput (name) {
   const fileName = path.join(__dirname, './kdl', name + '.kdl')
