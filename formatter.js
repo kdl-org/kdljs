@@ -19,23 +19,25 @@ function validateNode (node) {
     return false
   }
 
-  if (!node.hasOwnProperty('name') || typeof node.name !== 'string') {
+  if (!Object.prototype.hasOwnProperty.call(node, 'name') ||
+      typeof node.name !== 'string') {
     return false
   }
 
-  if (!node.hasOwnProperty('values') ||
+  if (!Object.prototype.hasOwnProperty.call(node, 'values') ||
       !Array.isArray(node.values) ||
       !node.values.every(value => validateValue(value))) {
     return false
   }
 
-  if (!node.hasOwnProperty('properties') ||
+  if (!Object.prototype.hasOwnProperty.call(node, 'properties') ||
       typeof node.properties !== 'object' ||
       !Object.values(node.properties).every(value => validateValue(value))) {
     return false
   }
 
-  if (!node.hasOwnProperty('children') || !validateDocument(node.children)) {
+  if (!Object.prototype.hasOwnProperty.call(node, 'children') ||
+      !validateDocument(node.children)) {
     return false
   }
 
