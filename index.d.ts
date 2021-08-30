@@ -1,3 +1,5 @@
+import "chevrotain";
+
 declare namespace kdljs {
   /**
    * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#document|Document}.
@@ -34,6 +36,9 @@ declare namespace kdljs {
 /**
   * @param {string} text - Input KDL file (or fragment)
   */
-declare function parse(text: string): kdljs.ParseResult;
+export function parse(text: string): kdljs.ParseResult;
 
-export = parse;
+/**
+  * @param {string} doc - Input KDL document
+  */
+export function format(doc: kdljs.Document): string;
