@@ -3,6 +3,7 @@
  */
 
 const { parse } = require('./parser.js')
+const { format } = require('./formatter.js')
 
 /**
  * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#document|Document}.
@@ -32,4 +33,9 @@ const { parse } = require('./parser.js')
 /**
  * @borrows module:kdljs/parser~parse as parse
  */
-module.exports = parse
+module.exports.parse = parse
+
+/**
+* @borrows module:kdljs/formatter~format as format
+*/
+module.exports.format = format
