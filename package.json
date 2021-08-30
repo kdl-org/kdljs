@@ -28,7 +28,7 @@
     "url": "git+https://github.com/kdl-org/kdljs.git"
   },
   "dependencies": {
-    "chevrotain": "^7.0.3"
+    "chevrotain": "^9.0.2"
   },
   "devDependencies": {
     "conventional-changelog-cli": "^2.1.1",
