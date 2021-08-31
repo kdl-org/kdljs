@@ -31,6 +31,25 @@ declare namespace kdljs {
     /** KDL Document */
     output?: Document;
   }
+
+  /**
+   * Formatting options
+   */
+  export interface FormattingOptions {
+    escapes?: Record<number, boolean>;
+    requireSemicolons?: boolean;
+    escapeNonAscii?: boolean;
+    escapeNonPrintableAscii?: boolean;
+    escapeCommon?: boolean;
+    escapeLinespace?: boolean;
+    newline?: string;
+    indent?: number;
+    indentChar?: string;
+    exponentChar?: string;
+    printEmptyChildren?: boolean;
+    printNullArgs?: boolean;
+    printNullProps?: boolean;
+  }
 }
 
 /**
@@ -41,4 +60,4 @@ export function parse(text: string): kdljs.ParseResult;
 /**
   * @param {string} doc - Input KDL document
   */
-export function format(doc: kdljs.Document): string;
+export function format(doc: kdljs.Document, options?: kdljs.FormattingOptions): string;
