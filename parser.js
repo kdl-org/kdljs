@@ -153,8 +153,9 @@ class KdlParser extends EmbeddedActionsParser {
 
       const properties = {}
       const values = []
+
+      this.SUBRULE(this.nodeSpace)
       this.MANY(() => {
-        this.SUBRULE(this.nodeSpace)
         this.OR1([
           {
             GATE: this.BACKTRACK(this.property),
@@ -168,9 +169,9 @@ class KdlParser extends EmbeddedActionsParser {
             ALT: () => values.push(this.SUBRULE(this.value))
           }
         ])
+        this.SUBRULE1(this.nodeSpace)
       })
 
-      this.SUBRULE1(this.nodeSpace)
       const children = this.OR2([
         {
           ALT: () => {
