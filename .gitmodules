@@ -1,0 +1,3 @@
+[submodule "test/kdl4j"]
+	path = test/kdl4j
+	url = https://github.com/hkolbeck/kdl4j
