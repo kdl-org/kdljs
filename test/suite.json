@@ -38,5 +38,10 @@
     { "name": "node", "values": [true] },
     { "name": "node", "values": [false] },
     { "name": "node", "values": [null] }
+  ],
+  "identifier_boolean_null": [
+    { "name": "true" },
+    { "name": "false" },
+    { "name": "null" }
   ]
 }

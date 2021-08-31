@@ -146,12 +146,7 @@ class KdlParser extends EmbeddedActionsParser {
     })
 
     this.RULE('node', () => {
-      const name = this.OR([
-        { ALT: () => this.CONSUME(Identifier).image },
-        { ALT: () => this.SUBRULE(this.string) },
-        { ALT: () => this.SUBRULE(this.rawString) }
-      ])
-
+      const name = this.SUBRULE(this.identifier)
       const properties = {}
       const values = []
 
@@ -201,11 +196,18 @@ class KdlParser extends EmbeddedActionsParser {
       return { name, properties, values, children }
     })
 
-    this.RULE('property', () => {
-      const key = this.OR([
+    this.RULE('identifier', () => {
+      return this.OR([
         { ALT: () => this.CONSUME(Identifier).image },
-        { ALT: () => this.SUBRULE(this.string) }
+        { ALT: () => this.SUBRULE(this.string) },
+        { ALT: () => this.SUBRULE(this.rawString) },
+        { ALT: () => this.CONSUME(Boolean).image },
+        { ALT: () => this.CONSUME(Null).image }
       ])
+    })
+
+    this.RULE('property', () => {
+      const key = this.SUBRULE(this.identifier)
       this.CONSUME(Equals)
       const value = this.SUBRULE(this.value)
       return [key, value]
