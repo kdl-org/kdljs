@@ -148,7 +148,8 @@ class KdlParser extends EmbeddedActionsParser {
     this.RULE('node', () => {
       const name = this.OR([
         { ALT: () => this.CONSUME(Identifier).image },
-        { ALT: () => this.SUBRULE(this.string) }
+        { ALT: () => this.SUBRULE(this.string) },
+        { ALT: () => this.SUBRULE(this.rawString) }
       ])
 
       const properties = {}
@@ -270,13 +271,7 @@ class KdlParser extends EmbeddedActionsParser {
           return parseInt(number.slice(1), radix[number[0]])
         }
       },
-      {
-        ALT: () => {
-          const string = this.CONSUME(RawString).image
-          const start = string.indexOf('"')
-          return string.slice(start + 1, -start)
-        }
-      }
+      { ALT: () => this.SUBRULE(this.rawString) }
     ]))
 
     this.RULE('string', () => {
@@ -298,6 +293,12 @@ class KdlParser extends EmbeddedActionsParser {
       this.CONSUME(CloseQuote)
 
       return string
+    })
+
+    this.RULE('rawString', () => {
+      const string = this.CONSUME(RawString).image
+      const start = string.indexOf('"')
+      return string.slice(start + 1, -start)
     })
 
     this.performSelfAnalysis()
