@@ -54,9 +54,11 @@ function validateValue (value) {
   return type === 'string' || type === 'number' || type === 'boolean' || value === null
 }
 
+/* eslint-disable no-control-regex */
 const linespace = /^[\r\n\u0085\u000C\u2028\u2029]$/
 const nonAscii = /^[^\x00-\x7F]$/
 const nonPrintableAscii = /^[\x00-\x19\x7F]$/
+/* eslint-enable no-control-regex */
 const commonEscapes = {
   '\n': '\\n',
   '\r': '\\r',
@@ -229,11 +231,11 @@ function formatDocument (doc, options, indent) {
  * @property {boolean} printNullProps
  */
 
- /**
-  * @access private
-  * @param {module:kdljs/formatter~Options} options - Formatting options
-  * @return {module:kdljs/formatter~ProcessedOptions}
-  */
+/**
+ * @access private
+ * @param {module:kdljs/formatter~Options} options - Formatting options
+ * @return {module:kdljs/formatter~ProcessedOptions}
+ */
 function processOptions (options) {
   return {
     escapes: {},

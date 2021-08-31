@@ -139,7 +139,6 @@ describe('kdl4j', function () {
         const expected = fs.readFileSync(expectedPath, 'utf8')
 
         if (KDL4J_BROKEN_OUTPUT_TESTS.has(file)) {
-
           it('parses', function () {
             const { output, errors } = parse(input)
             const parsedExpected = parse(expected).output
