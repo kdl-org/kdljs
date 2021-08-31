@@ -1,5 +1,7 @@
 /**
  * @module kdljs
+ * @borrows module:kdljs/parser~parse as parse
+ * @borrows module:kdljs/formatter~format as format
  */
 
 const { parse } = require('./parser.js')
@@ -30,12 +32,5 @@ const { format } = require('./formatter.js')
  * @type {(string|number|boolean|null)}
  */
 
-/**
- * @borrows module:kdljs/parser~parse as parse
- */
 module.exports.parse = parse
-
-/**
-* @borrows module:kdljs/formatter~format as format
-*/
 module.exports.format = format

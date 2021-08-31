@@ -13,7 +13,8 @@ module.exports = {
   source: {
     include: [
       'index.js',
-      'parser.js'
+      'parser.js',
+      'formatter.js'
     ]
   },
   opts: {

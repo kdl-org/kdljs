@@ -258,23 +258,23 @@ function processOptions (options) {
 /**
  * @typedef Options
  * @type {Object}
- * @property {Object<number,boolean>} [escapes={}]
- * @property {boolean} [requireSemicolons=false]
- * @property {boolean} [escapeNonAscii=false]
- * @property {boolean} [escapeNonPrintableAscii=true]
- * @property {boolean} [escapeCommon=true]
- * @property {boolean} [escapeLinespace=true]
- * @property {string} [newline='\n']
- * @property {number} [indent=2]
- * @property {string} [indentChar=' ']
- * @property {string} [exponentChar='e']
- * @property {boolean} [printEmptyChildren=false]
- * @property {boolean} [printNullArgs=true]
- * @property {boolean} [printNullProps=true]
+ * @property {Object<number,boolean>} [escapes={}] - A map of which characters to escape (by decimal codepoint)
+ * @property {boolean} [requireSemicolons=false] - Whether to print semicolons after each node
+ * @property {boolean} [escapeNonAscii=false] - Whether to escape any non-ASCII characters
+ * @property {boolean} [escapeNonPrintableAscii=true] - Whether to escape non-printable ASCII characters
+ * @property {boolean} [escapeCommon=true] - Whether to escape common characters (i.e. those with single-character escape codes)
+ * @property {boolean} [escapeLinespace=true] - Whether to escape linespace characters
+ * @property {string} [newline='\n'] - The newline character
+ * @property {number} [indent=4] - The number of characters (from `indentChar`) to indent each level with
+ * @property {string} [indentChar=' '] - What character to indent with
+ * @property {string} [exponentChar='E'] - What character to use for the exponent in floats (`e` or `E`)
+ * @property {boolean} [printEmptyChildren=false] - Whether to print empty brackets if a node has no children
+ * @property {boolean} [printNullArgs=true] - Whether to print `null` values
+ * @property {boolean} [printNullProps=true] - Whether to print properties with value `null`
  */
 
 /**
- * @function parse
+ * @function format
  * @param {module:kdljs~Document} doc - Input KDL document
  * @param {module:kdljs/formatter~Options} [options={}] - Formatting options
  * @return {string} formatted KDL file
