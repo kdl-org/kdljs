@@ -155,7 +155,11 @@ class KdlParser extends EmbeddedActionsParser {
       const properties = {}
       const values = []
 
-      this.SUBRULE(this.nodeSpace)
+      const next = this.LA(1).tokenType
+      if (next !== NewLine && next !== SemiColon && next !== EOF) {
+        this.SUBRULE(this.nodeSpace)
+      }
+
       this.MANY(() => {
         this.OR1([
           {
@@ -170,7 +174,12 @@ class KdlParser extends EmbeddedActionsParser {
             ALT: () => values.push(this.SUBRULE(this.value))
           }
         ])
-        this.SUBRULE1(this.nodeSpace)
+
+        const next = this.LA(1).tokenType
+        if (next !== LeftBrace && next !== NewLine &&
+            next !== SemiColon && next !== EOF) {
+          this.SUBRULE1(this.nodeSpace)
+        }
       })
 
       const children = this.OR2([
@@ -210,7 +219,7 @@ class KdlParser extends EmbeddedActionsParser {
     })
 
     this.RULE('nodeSpace', () => {
-      this.MANY(() => this.OR([
+      this.AT_LEAST_ONE(() => this.OR([
         { ALT: () => this.CONSUME(WhiteSpace) },
         {
           ALT: () => {
