@@ -54,15 +54,133 @@
     
 
     
-        <h3 class="subsection-title">Members</h3>
+
+    
+        <h3 class="subsection-title">Methods</h3>
 
         
             
-<h4 class="name" id=".format"><span class="type-signature">(static) </span>format<span class="type-signature"></span></h4>
+
+    
+
+    
+    <h4 class="name" id=".format"><span class="type-signature">(static) </span>format<span class="signature">(doc, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+
+    
 
 
 
 
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>doc</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-kdljs.html#~Document">module:kdljs~Document</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>Input KDL document</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="module-kdljs_formatter.html#~Options">module:kdljs/formatter~Options</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    {}
+                
+                </td>
+            
+
+            <td class="description last"><p>Formatting options</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -98,7 +216,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line41">line 41</a>
+        <a href="formatter.js.html">formatter.js</a>, <a href="formatter.js.html#line276">line 276</a>
     </li></ul></dd>
     
 
@@ -114,13 +232,110 @@
 
 
 
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>formatted KDL file</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
         
             
-<h4 class="name" id=".parse"><span class="type-signature">(static) </span>parse<span class="type-signature"></span></h4>
+
+    
+
+    
+    <h4 class="name" id=".parse"><span class="type-signature">(static) </span>parse<span class="signature">(text)</span><span class="type-signature"> &rarr; {<a href="module-kdljs_parser.html#~parseResult">module:kdljs/parser~parseResult</a>}</span></h4>
+    
+
+    
 
 
 
 
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Input KDL file (or fragment)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -156,7 +371,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line36">line 36</a>
+        <a href="parser.js.html">parser.js</a>, <a href="parser.js.html#line358">line 358</a>
     </li></ul></dd>
     
 
@@ -172,9 +387,43 @@
 
 
 
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
         
+<div class="param-desc">
+    <p>Output</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="module-kdljs_parser.html#~parseResult">module:kdljs/parser~parseResult</a></span>
+
+
+    </dd>
+</dl>
+
     
 
+
+
+
+
+        
     
 
     
@@ -236,7 +485,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line8">line 8</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line10">line 10</a>
     </li></ul></dd>
     
 
@@ -429,7 +678,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line15">line 15</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line17">line 17</a>
     </li></ul></dd>
     
 
@@ -510,7 +759,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line26">line 26</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line28">line 28</a>
     </li></ul></dd>
     
 
@@ -540,13 +789,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-kdljs.html">kdljs</a></li><li><a href="module-kdljs_parser.html">kdljs/parser</a></li></ul><h3>Classes</h3><ul><li><a href="module-kdljs_parser-KdlParser.html">KdlParser</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-kdljs.html">kdljs</a></li><li><a href="module-kdljs_formatter.html">kdljs/formatter</a></li><li><a href="module-kdljs_parser.html">kdljs/parser</a></li></ul><h3>Classes</h3><ul><li><a href="module-kdljs_parser-KdlParser.html">KdlParser</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Aug 31 2021 22:56:14 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Aug 31 2021 23:14:42 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
