@@ -2,10 +2,12 @@
  * @module kdljs
  * @borrows module:kdljs/parser~parse as parse
  * @borrows module:kdljs/formatter~format as format
+ * @borrows module:kdljs/validator~validateDocument as validateDocument
  */
 
 const { parse } = require('./parser.js')
 const { format } = require('./formatter.js')
+const { validateDocument } = require('./validator.js')
 
 /**
  * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#document|Document}.
@@ -34,3 +36,4 @@ const { format } = require('./formatter.js')
 
 module.exports.parse = parse
 module.exports.format = format
+module.exports.validateDocument = validateDocument

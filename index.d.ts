@@ -53,11 +53,16 @@ declare namespace kdljs {
 }
 
 /**
-  * @param {string} text - Input KDL file (or fragment)
-  */
+ * @param {string} text - Input KDL file (or fragment)
+ */
 export function parse(text: string): kdljs.ParseResult;
 
 /**
-  * @param {string} doc - Input KDL document
-  */
+ * @param {kdljs.Document} doc - Input KDL document
+ */
 export function format(doc: kdljs.Document, options?: kdljs.FormattingOptions): string;
+
+/**
+ * @param {kdljs.Document} doc - KDL document
+ */
+export function validateDocument(doc: kdljs.Document): boolean;
