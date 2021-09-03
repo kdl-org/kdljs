@@ -1,3 +1,17 @@
+# [0.1.0-rc.1](https://github.com/kdl-org/kdljs/compare/v0.1.0-rc.0...v0.1.0-rc.1) (2021-09-03)
+
+
+### Bug Fixes
+
+* **parser:** fix multiline comments behavior ([48c2bba](https://github.com/kdl-org/kdljs/commit/48c2bbaf0d18b2ff7c2bacf141b482ca4deba056))
+
+
+### Features
+
+* **validator:** extract document validator ([9ec20f9](https://github.com/kdl-org/kdljs/commit/9ec20f9c4b19cac7e1a5672c43e2a959dff2bdaa))
+
+
+
 # [0.1.0-rc.0](https://github.com/kdl-org/kdljs/compare/v0.0.3...v0.1.0-rc.0) (2021-08-31)
 
 
@@ -10,9 +24,11 @@
 * **ts:** update types ([3049abe](https://github.com/kdl-org/kdljs/commit/3049abe46343cea4f2c091ef9426573d75771668))
 
 
+* feat(formatter)!: support KDL serialization ([4c4c94e](https://github.com/kdl-org/kdljs/commit/4c4c94edb14c2867f539288033f0edca97a15410))
+
+
 ### Features
 
-* **formatter**: support KDL serialization ([4c4c94e](https://github.com/kdl-org/kdljs/commit/4c4c94edb14c2867f539288033f0edca97a15410))
 * **formatter:** support same output options as kdl4j ([d37df28](https://github.com/kdl-org/kdljs/commit/d37df287cf99a9628e37a14f8e6c35cb7cac5632))
 * **ts:** update ts types for output formatting ([c3dd78d](https://github.com/kdl-org/kdljs/commit/c3dd78db40dce7aa60a06c07e8e2b131fdba932b))
 
