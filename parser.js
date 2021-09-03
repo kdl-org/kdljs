@@ -25,10 +25,20 @@ const LineComment = createToken({
   pattern: /\/\/[^]*?(\x0D\x0A|[\x0A\x0C\x85\u2028\u2029])/,
   line_breaks: true
 })
-const MultiLineComment = createToken({
-  name: 'MultiLineComment',
-  pattern: /\/\*[^]*?\*\//,
+const OpenMultiLineComment = createToken({
+  name: 'OpenMultiLineComment',
+  pattern: /\/\*/,
+  push_mode: 'multilineComment'
+})
+const MultiLineCommentContent = createToken({
+  name: 'MultiLineCommentContent',
+  pattern: /([^/*]+|\*|\/)/,
   line_breaks: true
+})
+const CloseMultiLineComment = createToken({
+  name: 'CloseMultiLineComment',
+  pattern: /\*\//,
+  pop_mode: 'multilineComment'
 })
 
 // Values
@@ -78,7 +88,7 @@ const tokens = {
       NewLine,
       BlockComment,
       LineComment,
-      MultiLineComment,
+      OpenMultiLineComment,
       Boolean,
       Null,
       RawString,
@@ -91,6 +101,11 @@ const tokens = {
       EscLine,
       OpenQuote,
       Identifier
+    ],
+    multilineComment: [
+      OpenMultiLineComment,
+      CloseMultiLineComment,
+      MultiLineCommentContent
     ],
     string: [
       Unicode,
@@ -136,7 +151,7 @@ class KdlParser extends EmbeddedActionsParser {
           }
         },
         { ALT: () => this.CONSUME(LineComment) },
-        { ALT: () => this.CONSUME(MultiLineComment) },
+        { ALT: () => this.SUBRULE(this.multilineComment) },
         { ALT: () => this.CONSUME(WhiteSpace) },
         { ALT: () => this.CONSUME(NewLine) },
         { ALT: () => nodes.push(this.SUBRULE1(this.node)) }
@@ -223,6 +238,7 @@ class KdlParser extends EmbeddedActionsParser {
     this.RULE('nodeSpace', () => {
       this.AT_LEAST_ONE(() => this.OR([
         { ALT: () => this.CONSUME(WhiteSpace) },
+        { ALT: () => this.SUBRULE(this.multilineComment) },
         {
           ALT: () => {
             this.CONSUME(EscLine)
@@ -310,6 +326,17 @@ class KdlParser extends EmbeddedActionsParser {
       const string = this.CONSUME(RawString).image
       const start = string.indexOf('"')
       return string.slice(start + 1, -start)
+    })
+
+    this.RULE('multilineComment', () => {
+      this.CONSUME(OpenMultiLineComment)
+      this.MANY(() => {
+        this.OR([
+          { ALT: () => this.CONSUME(MultiLineCommentContent) },
+          { ALT: () => this.SUBRULE(this.multilineComment) }
+        ])
+      })
+      this.CONSUME(CloseMultiLineComment)
     })
 
     this.performSelfAnalysis()

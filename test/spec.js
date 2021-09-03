@@ -38,16 +38,6 @@ describe('parses', function () {
 })
 
 const KDL4J_BROKEN_TESTS = new Set([
-  // Nodes cannot have multiline comments between values/props.
-  'asterisk_in_block_comment.kdl',
-  'block_comment.kdl',
-  'block_comment_after_node.kdl',
-  'multiline_comment.kdl',
-  'nested_block_comment.kdl',
-  'nested_comments.kdl',
-  'nested_multiline_block_comment.kdl',
-  'newlines_in_block_comment.kdl',
-
   // Unclear? If the escline was on the previous line it would continue
   // node1 but then the schema would require a node separator before node2,
   // as the newline of the escline itself does not count. If the escline is
