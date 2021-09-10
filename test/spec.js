@@ -51,7 +51,13 @@ const KDL4J_BROKEN_TESTS = new Set([
 
   // Only whitespace is supported between /- and the thing it is
   // commenting out
-  'slashdash_arg_before_newline_esc.kdl'
+  'slashdash_arg_before_newline_esc.kdl',
+
+  // This is supposed to fail but the syntax is supported now
+  'underscore_in_fraction.kdl',
+
+  // This was supported but is no longer
+  'unusual_chars_in_bare_id.kdl'
 ])
 
 const KDL4J_BROKEN_OUTPUT_TESTS = new Set([
