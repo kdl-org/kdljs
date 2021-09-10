@@ -229,7 +229,6 @@ function processOptions (options) {
  */
 module.exports.format = function format (doc, options) {
   if (!validateDocument(doc)) {
-    console.log(doc)
     throw new TypeError('Invalid KDL document')
   }
 
