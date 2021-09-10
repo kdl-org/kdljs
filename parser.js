@@ -216,9 +216,7 @@ class KdlParser extends EmbeddedActionsParser {
       return this.OR([
         { ALT: () => this.CONSUME(Identifier).image },
         { ALT: () => this.SUBRULE(this.string) },
-        { ALT: () => this.SUBRULE(this.rawString) },
-        { ALT: () => this.CONSUME(Boolean).image },
-        { ALT: () => this.CONSUME(Null).image }
+        { ALT: () => this.SUBRULE(this.rawString) }
       ])
     })
 
