@@ -55,7 +55,7 @@ const Float = createToken({
 })
 const Integer = createToken({
   name: 'Integer',
-  pattern: /0x[0-9a-fA-F][0-9a-fA-F_]*|0o[0-7][0-7_]*|0b[01][01_]*/
+  pattern: /[+-]?(0x[0-9a-fA-F][0-9a-fA-F_]*|0o[0-7][0-7_]*|0b[01][01_]*)/
 })
 
 // Other
@@ -295,8 +295,10 @@ class KdlParser extends EmbeddedActionsParser {
       },
       {
         ALT: () => {
-          const number = this.CONSUME(Integer).image.slice(1).replace(/_/g, '')
-          return parseInt(number.slice(1), radix[number[0]])
+          const token = this.CONSUME(Integer).image
+          const sign = token.startsWith('-') ? -1 : 1
+          const number = token.replace(/^[+-]?0|_/g, '')
+          return sign * parseInt(number.slice(1), radix[number[0]])
         }
       },
       { ALT: () => this.SUBRULE(this.rawString) }

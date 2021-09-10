@@ -25,7 +25,10 @@
     { "name": "node", "values": [8] },
     { "name": "node", "values": [100] },
     { "name": "node", "values": [16] },
-    { "name": "node", "values": [100] }
+    { "name": "node", "values": [100] },
+    { "name": "node", "values": [-2] },
+    { "name": "node", "values": [-8] },
+    { "name": "node", "values": [-16] }
   ],
   "value_number_separator": [
     { "name": "node", "values": [123] },
