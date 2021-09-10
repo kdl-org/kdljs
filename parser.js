@@ -77,7 +77,7 @@ const Unicode = createToken({
   line_breaks: true
 })
 const Escape = createToken({ name: 'Escape', pattern: /\\[nrt\\/"bf]/ })
-const UnicodeEscape = createToken({ name: 'UnicodeEscape', pattern: /\\u\{[0-9a-fA-F]{0,6}\}/ })
+const UnicodeEscape = createToken({ name: 'UnicodeEscape', pattern: /\\u\{[0-9a-fA-F]{1,6}\}/ })
 const CloseQuote = createToken({ name: 'CloseQuote', pattern: /"/, pop_mode: true })
 
 const tokens = {
