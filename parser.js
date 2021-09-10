@@ -61,7 +61,7 @@ const Integer = createToken({
 // Other
 const Identifier = createToken({
   name: 'Identifier',
-  pattern: /[\x21-\x2F\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21-\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*/
+  pattern: /(?![+-]\d)[\x21-\x2F\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21-\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*/
 })
 const SemiColon = createToken({ name: 'SemiColon', pattern: /;/ })
 const Equals = createToken({ name: 'Equals', pattern: /=/ })
