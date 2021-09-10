@@ -51,7 +51,7 @@ const RawString = createToken({
 })
 const Float = createToken({
   name: 'Float',
-  pattern: /[+-]?[0-9][0-9_]*(\.[0-9]+)?([eE][+-]?[0-9][0-9_]*)?/
+  pattern: /[+-]?[0-9][0-9_]*(\.[0-9][0-9_]*)?([eE][+-]?[0-9][0-9_]*)?/
 })
 const Integer = createToken({
   name: 'Integer',
