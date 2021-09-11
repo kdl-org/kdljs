@@ -41,6 +41,11 @@ const WhiteSpace = createToken({
   // eslint-disable-next-line no-control-regex
   pattern: /[\x09\x20\xA0\u1680\u2000-\u200A\u202F\u205F\u3000]+/
 })
+const BOM = createToken({
+  name: 'BOM',
+  // eslint-disable-next-line no-control-regex
+  pattern: /\uFFEF/
+})
 const NewLine = createToken({
   name: 'NewLine',
   // eslint-disable-next-line no-control-regex
@@ -50,7 +55,7 @@ const BlockComment = createToken({ name: 'BlockComment', pattern: /\/-/ })
 const LineComment = createToken({
   name: 'LineComment',
   // eslint-disable-next-line no-control-regex
-  pattern: /\/\/[^]*?(\x0D\x0A|[\x0A\x0C\x85\u2028\u2029])/,
+  pattern: /\/\/(\x0D(?!\x0A)|[^\x0A\x0C\x0D\x85\u2028\u2029])*/,
   line_breaks: true
 })
 const OpenMultiLineComment = createToken({
@@ -79,22 +84,24 @@ const RawString = createToken({
 })
 const Float = createToken({
   name: 'Float',
-  pattern: /[+-]?[0-9][0-9_]*(\.[0-9]+)?([eE][+-]?[0-9][0-9_]*)?/
+  pattern: /[+-]?[0-9][0-9_]*(\.[0-9][0-9_]*)?([eE][+-]?[0-9][0-9_]*)?/
 })
 const Integer = createToken({
   name: 'Integer',
-  pattern: /0x[0-9a-fA-F][0-9a-fA-F_]*|0o[0-7][0-7_]*|0b[01][01_]*/
+  pattern: /[+-]?(0x[0-9a-fA-F][0-9a-fA-F_]*|0o[0-7][0-7_]*|0b[01][01_]*)/
 })
 
 // Other
 const Identifier = createToken({
   name: 'Identifier',
-  pattern: /[\x21-\x2F\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21-\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*/
+  pattern: /(?![+-]\d)[\x21-\x27\x2A-\x2E\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21-\x27\x2A-\x2E\x30-\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*/
 })
 const SemiColon = createToken({ name: 'SemiColon', pattern: /;/ })
 const Equals = createToken({ name: 'Equals', pattern: /=/ })
 const LeftBrace = createToken({ name: 'LeftBrace', pattern: /\{/ })
 const RightBrace = createToken({ name: 'RightBrace', pattern: /\}/ })
+const LeftParenthesis = createToken({ name: 'LeftParenthesis', pattern: /\(/ })
+const RightParenthesis = createToken({ name: 'RightParenthesis', pattern: /\)/ })
 const EscLine = createToken({ name: 'EscLine', pattern: /\\/ })
 
 // String
@@ -104,8 +111,8 @@ const Unicode = createToken({
   pattern: /[^\\"]+/,
   line_breaks: true
 })
-const Escape = createToken({ name: 'Escape', pattern: /\\[nrt\\"bf]/ })
-const UnicodeEscape = createToken({ name: 'UnicodeEscape', pattern: /\\u\{[0-9a-fA-F]{0,6}\}/ })
+const Escape = createToken({ name: 'Escape', pattern: /\\[nrt\\/"bf]/ })
+const UnicodeEscape = createToken({ name: 'UnicodeEscape', pattern: /\\u\{[0-9a-fA-F]{1,6}\}/ })
 const CloseQuote = createToken({ name: 'CloseQuote', pattern: /"/, pop_mode: true })
 
 const tokens = {
@@ -113,6 +120,7 @@ const tokens = {
   modes: {
     main: [
       WhiteSpace,
+      BOM,
       NewLine,
       BlockComment,
       LineComment,
@@ -126,6 +134,8 @@ const tokens = {
       Equals,
       LeftBrace,
       RightBrace,
+      LeftParenthesis,
+      RightParenthesis,
       EscLine,
       OpenQuote,
       Identifier
@@ -149,6 +159,7 @@ const escapes = {
   '\\r': '\r',
   '\\t': '\t',
   '\\\\': '\\',
+  '\\/': '/',
   '\\"': '"',
   '\\b': '\x08',
   '\\f': '\x0C'
@@ -174,13 +185,12 @@ class KdlParser extends EmbeddedActionsParser {
         {
           ALT: () => {
             this.CONSUME(BlockComment)
-            this.OPTION1(() => this.CONSUME1(WhiteSpace))
+            this.OPTION1(() => this.SUBRULE(this.nodeSpace))
             this.SUBRULE(this.node)
           }
         },
-        { ALT: () => this.CONSUME(LineComment) },
-        { ALT: () => this.SUBRULE(this.multilineComment) },
-        { ALT: () => this.CONSUME(WhiteSpace) },
+        { ALT: () => this.SUBRULE(this.lineComment) },
+        { ALT: () => this.SUBRULE(this.whiteSpace) },
         { ALT: () => this.CONSUME(NewLine) },
         { ALT: () => nodes.push(this.SUBRULE1(this.node)) }
       ]))
@@ -189,6 +199,7 @@ class KdlParser extends EmbeddedActionsParser {
     })
 
     this.RULE('node', () => {
+      this.OPTION1(() => this.SUBRULE(this.tag))
       const name = this.SUBRULE(this.identifier)
       const properties = {}
       const values = []
@@ -210,6 +221,22 @@ class KdlParser extends EmbeddedActionsParser {
           {
             GATE: this.BACKTRACK(this.value),
             ALT: () => values.push(this.SUBRULE(this.value))
+          },
+          {
+            ALT: () => {
+              this.CONSUME(BlockComment)
+              this.OPTION2(() => this.SUBRULE(this.nodeSpace))
+              this.OR([
+                {
+                  GATE: this.BACKTRACK(this.property),
+                  ALT: () => this.SUBRULE1(this.property)
+                },
+                {
+                  GATE: this.BACKTRACK(this.value),
+                  ALT: () => this.SUBRULE1(this.value)
+                }
+              ])
+            }
           }
         ])
 
@@ -233,6 +260,15 @@ class KdlParser extends EmbeddedActionsParser {
             this.SUBRULE1(this.nodeTerminator)
             return []
           }
+        },
+        {
+          ALT: () => {
+            this.CONSUME1(BlockComment)
+            this.OPTION3(() => this.SUBRULE1(this.nodeSpace))
+            this.SUBRULE1(this.nodeChildren)
+            this.OPTION4(() => this.SUBRULE2(this.nodeTerminator))
+            return []
+          }
         }
       ])
 
@@ -243,10 +279,15 @@ class KdlParser extends EmbeddedActionsParser {
       return this.OR([
         { ALT: () => this.CONSUME(Identifier).image },
         { ALT: () => this.SUBRULE(this.string) },
-        { ALT: () => this.SUBRULE(this.rawString) },
-        { ALT: () => this.CONSUME(Boolean).image },
-        { ALT: () => this.CONSUME(Null).image }
+        { ALT: () => this.SUBRULE(this.rawString) }
       ])
+    })
+
+    this.RULE('tag', () => {
+      this.CONSUME(LeftParenthesis)
+      const tag = this.SUBRULE(this.identifier)
+      this.CONSUME(RightParenthesis)
+      return tag
     })
 
     this.RULE('property', () => {
@@ -265,33 +306,13 @@ class KdlParser extends EmbeddedActionsParser {
 
     this.RULE('nodeSpace', () => {
       this.AT_LEAST_ONE(() => this.OR([
-        { ALT: () => this.CONSUME(WhiteSpace) },
-        { ALT: () => this.SUBRULE(this.multilineComment) },
+        { ALT: () => this.SUBRULE(this.whiteSpace) },
         {
           ALT: () => {
             this.CONSUME(EscLine)
-            this.OPTION(() => this.CONSUME1(WhiteSpace))
-            this.OR1([
-              { ALT: () => this.CONSUME(LineComment) },
-              { ALT: () => this.CONSUME(NewLine) }
-            ])
-          }
-        },
-        {
-          ALT: () => {
-            this.CONSUME(BlockComment)
-            this.OPTION1(() => this.CONSUME2(WhiteSpace))
-            this.OR2([
-              {
-                GATE: this.BACKTRACK(this.property),
-                ALT: () => this.SUBRULE(this.property)
-              },
-              {
-                GATE: this.BACKTRACK(this.value),
-                ALT: () => this.SUBRULE(this.value)
-              },
-              { ALT: () => this.SUBRULE(this.nodeChildren) }
-            ])
+            this.OPTION(() => this.SUBRULE1(this.whiteSpace))
+            this.OPTION1(() => this.CONSUME(LineComment))
+            this.CONSUME(NewLine)
           }
         }
       ]))
@@ -305,29 +326,34 @@ class KdlParser extends EmbeddedActionsParser {
       ])
     })
 
-    this.RULE('value', () => this.OR([
-      { ALT: () => this.SUBRULE(this.string) },
-      { ALT: () => this.CONSUME(Boolean).image === 'true' },
-      {
-        ALT: () => {
-          this.CONSUME(Null)
-          return null
-        }
-      },
-      {
-        ALT: () => {
-          const number = this.CONSUME(Float).image.replace(/_/g, '')
-          return parseFloat(number, 10)
-        }
-      },
-      {
-        ALT: () => {
-          const number = this.CONSUME(Integer).image.slice(1).replace(/_/g, '')
-          return parseInt(number.slice(1), radix[number[0]])
-        }
-      },
-      { ALT: () => this.SUBRULE(this.rawString) }
-    ]))
+    this.RULE('value', () => {
+      this.OPTION(() => this.SUBRULE(this.tag))
+      return this.OR([
+        { ALT: () => this.SUBRULE(this.string) },
+        { ALT: () => this.CONSUME(Boolean).image === 'true' },
+        {
+          ALT: () => {
+            this.CONSUME(Null)
+            return null
+          }
+        },
+        {
+          ALT: () => {
+            const number = this.CONSUME(Float).image.replace(/_/g, '')
+            return parseFloat(number, 10)
+          }
+        },
+        {
+          ALT: () => {
+            const token = this.CONSUME(Integer).image
+            const sign = token.startsWith('-') ? -1 : 1
+            const number = token.replace(/^[+-]?0|_/g, '')
+            return sign * parseInt(number.slice(1), radix[number[0]])
+          }
+        },
+        { ALT: () => this.SUBRULE(this.rawString) }
+      ])
+    })
 
     this.RULE('string', () => {
       let string = ''
@@ -356,6 +382,14 @@ class KdlParser extends EmbeddedActionsParser {
       return string.slice(start + 1, -start)
     })
 
+    this.RULE('lineComment', () => {
+      this.CONSUME(LineComment)
+      this.OR([
+        { ALT: () => this.CONSUME(NewLine) },
+        { ALT: () => this.CONSUME(EOF) }
+      ])
+    })
+
     this.RULE('multilineComment', () => {
       this.CONSUME(OpenMultiLineComment)
       this.MANY(() => {
@@ -365,6 +399,16 @@ class KdlParser extends EmbeddedActionsParser {
         ])
       })
       this.CONSUME(CloseMultiLineComment)
+    })
+
+    this.RULE('whiteSpace', () => {
+      this.AT_LEAST_ONE(() => {
+        this.OR([
+          { ALT: () => this.CONSUME(BOM) },
+          { ALT: () => this.CONSUME(WhiteSpace) },
+          { ALT: () => this.SUBRULE(this.multilineComment) }
+        ])
+      })
     })
 
     this.performSelfAnalysis()
@@ -444,7 +488,7 @@ module.exports.KdlParser = KdlParser
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Fri Sep 03 2021 23:42:40 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sat Sep 11 2021 17:34:31 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
