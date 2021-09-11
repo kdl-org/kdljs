@@ -41,5 +41,12 @@
     { "name": "node", "values": [true] },
     { "name": "node", "values": [false] },
     { "name": "node", "values": [null] }
+  ],
+  "tag_node": [
+    { "name": "node" }
+  ],
+  "tag_value": [
+    { "name": "node", "values": ["value"] },
+    { "name": "node", "properties": { "key": "value" } }
   ]
 }

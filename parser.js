@@ -67,6 +67,8 @@ const SemiColon = createToken({ name: 'SemiColon', pattern: /;/ })
 const Equals = createToken({ name: 'Equals', pattern: /=/ })
 const LeftBrace = createToken({ name: 'LeftBrace', pattern: /\{/ })
 const RightBrace = createToken({ name: 'RightBrace', pattern: /\}/ })
+const LeftParenthesis = createToken({ name: 'LeftParenthesis', pattern: /\(/ })
+const RightParenthesis = createToken({ name: 'RightParenthesis', pattern: /\)/ })
 const EscLine = createToken({ name: 'EscLine', pattern: /\\/ })
 
 // String
@@ -98,6 +100,8 @@ const tokens = {
       Equals,
       LeftBrace,
       RightBrace,
+      LeftParenthesis,
+      RightParenthesis,
       EscLine,
       OpenQuote,
       Identifier
@@ -162,6 +166,7 @@ class KdlParser extends EmbeddedActionsParser {
     })
 
     this.RULE('node', () => {
+      this.OPTION1(() => this.SUBRULE(this.tag))
       const name = this.SUBRULE(this.identifier)
       const properties = {}
       const values = []
@@ -220,6 +225,13 @@ class KdlParser extends EmbeddedActionsParser {
       ])
     })
 
+    this.RULE('tag', () => {
+      this.CONSUME(LeftParenthesis)
+      const tag = this.SUBRULE(this.identifier)
+      this.CONSUME(RightParenthesis)
+      return tag
+    })
+
     this.RULE('property', () => {
       const key = this.SUBRULE(this.identifier)
       this.CONSUME(Equals)
@@ -276,31 +288,34 @@ class KdlParser extends EmbeddedActionsParser {
       ])
     })
 
-    this.RULE('value', () => this.OR([
-      { ALT: () => this.SUBRULE(this.string) },
-      { ALT: () => this.CONSUME(Boolean).image === 'true' },
-      {
-        ALT: () => {
-          this.CONSUME(Null)
-          return null
-        }
-      },
-      {
-        ALT: () => {
-          const number = this.CONSUME(Float).image.replace(/_/g, '')
-          return parseFloat(number, 10)
-        }
-      },
-      {
-        ALT: () => {
-          const token = this.CONSUME(Integer).image
-          const sign = token.startsWith('-') ? -1 : 1
-          const number = token.replace(/^[+-]?0|_/g, '')
-          return sign * parseInt(number.slice(1), radix[number[0]])
-        }
-      },
-      { ALT: () => this.SUBRULE(this.rawString) }
-    ]))
+    this.RULE('value', () => {
+      this.OPTION(() => this.SUBRULE(this.tag))
+      return this.OR([
+        { ALT: () => this.SUBRULE(this.string) },
+        { ALT: () => this.CONSUME(Boolean).image === 'true' },
+        {
+          ALT: () => {
+            this.CONSUME(Null)
+            return null
+          }
+        },
+        {
+          ALT: () => {
+            const number = this.CONSUME(Float).image.replace(/_/g, '')
+            return parseFloat(number, 10)
+          }
+        },
+        {
+          ALT: () => {
+            const token = this.CONSUME(Integer).image
+            const sign = token.startsWith('-') ? -1 : 1
+            const number = token.replace(/^[+-]?0|_/g, '')
+            return sign * parseInt(number.slice(1), radix[number[0]])
+          }
+        },
+        { ALT: () => this.SUBRULE(this.rawString) }
+      ])
+    })
 
     this.RULE('string', () => {
       let string = ''
