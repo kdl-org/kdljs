@@ -22,7 +22,7 @@ const BlockComment = createToken({ name: 'BlockComment', pattern: /\/-/ })
 const LineComment = createToken({
   name: 'LineComment',
   // eslint-disable-next-line no-control-regex
-  pattern: /\/\/[^]*?(\x0D\x0A|[\x0A\x0C\x85\u2028\u2029])/,
+  pattern: /\/\/(\x0D(?!\x0A)|[^\x0A\x0C\x0D\x85\u2028\u2029])*/,
   line_breaks: true
 })
 const OpenMultiLineComment = createToken({
@@ -155,7 +155,7 @@ class KdlParser extends EmbeddedActionsParser {
             this.SUBRULE(this.node)
           }
         },
-        { ALT: () => this.CONSUME(LineComment) },
+        { ALT: () => this.SUBRULE(this.lineComment) },
         { ALT: () => this.SUBRULE(this.multilineComment) },
         { ALT: () => this.CONSUME(WhiteSpace) },
         { ALT: () => this.CONSUME(NewLine) },
@@ -254,16 +254,14 @@ class KdlParser extends EmbeddedActionsParser {
           ALT: () => {
             this.CONSUME(EscLine)
             this.OPTION(() => this.CONSUME1(WhiteSpace))
-            this.OR1([
-              { ALT: () => this.CONSUME(LineComment) },
-              { ALT: () => this.CONSUME(NewLine) }
-            ])
+            this.OPTION1(() => this.CONSUME(LineComment))
+            this.CONSUME(NewLine)
           }
         },
         {
           ALT: () => {
             this.CONSUME(BlockComment)
-            this.OPTION1(() => this.CONSUME2(WhiteSpace))
+            this.OPTION2(() => this.CONSUME2(WhiteSpace))
             this.OR2([
               {
                 GATE: this.BACKTRACK(this.property),
@@ -342,6 +340,14 @@ class KdlParser extends EmbeddedActionsParser {
       const string = this.CONSUME(RawString).image
       const start = string.indexOf('"')
       return string.slice(start + 1, -start)
+    })
+
+    this.RULE('lineComment', () => {
+      this.CONSUME(LineComment)
+      this.OR([
+        { ALT: () => this.CONSUME(NewLine) },
+        { ALT: () => this.CONSUME(EOF) }
+      ])
     })
 
     this.RULE('multilineComment', () => {

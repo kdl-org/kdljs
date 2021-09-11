@@ -45,10 +45,6 @@ const KDL4J_BROKEN_TESTS = new Set([
   // to me.
   'escline_comment_node.kdl',
 
-  // Single-line comments must have a trailing newline (i.e. cannot
-  // be at the EOF)
-  'only_line_comment.kdl',
-
   // Only whitespace is supported between /- and the thing it is
   // commenting out
   'slashdash_arg_before_newline_esc.kdl',
