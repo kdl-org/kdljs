@@ -1,3 +1,23 @@
+# [0.1.0-rc.2](https://github.com/kdl-org/kdljs/compare/v0.1.0-rc.1...v0.1.0-rc.2) (2021-09-11)
+
+
+### Bug Fixes
+
+* **formatter:** remove debug statement ([95fd47f](https://github.com/kdl-org/kdljs/commit/95fd47fe8d3312e5ff415ba525b45a8056b9eb23))
+* **parser:** allow _ in decimal parts of numbers ([541ab30](https://github.com/kdl-org/kdljs/commit/541ab303d43dd949447009857e8b29f9022ff1fe))
+* **parser:** allow escaped forward slash ([159d9ba](https://github.com/kdl-org/kdljs/commit/159d9ba09df44e11927a6c7a51a6a5a5e2b10972))
+* **parser:** allow line comment at EOF ([1c72d65](https://github.com/kdl-org/kdljs/commit/1c72d65cb7e2647475fe0fbd95b8543922ebdd98))
+* **parser:** allow signed non-decimal integers ([2f0ab9b](https://github.com/kdl-org/kdljs/commit/2f0ab9beb8998df9ff97b58a040c6b8f9357b248))
+* **parser:** fix node-space and whitespace ([54ccc28](https://github.com/kdl-org/kdljs/commit/54ccc28e09ef0d9fdfc757062581691f0a479925))
+* **parser:** require one hex character in \u{} ([0d6304b](https://github.com/kdl-org/kdljs/commit/0d6304ba2bfe078d47bafa615bfa992249d1a4b1))
+
+
+### Features
+
+* **parser:** support (type) annotation ([54dbb53](https://github.com/kdl-org/kdljs/commit/54dbb537caa6c9517dfa298f12e29defec65f832))
+
+
+
 # [0.1.0-rc.1](https://github.com/kdl-org/kdljs/compare/v0.1.0-rc.0...v0.1.0-rc.1) (2021-09-03)
 
 
