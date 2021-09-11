@@ -13,6 +13,11 @@ const WhiteSpace = createToken({
   // eslint-disable-next-line no-control-regex
   pattern: /[\x09\x20\xA0\u1680\u2000-\u200A\u202F\u205F\u3000]+/
 })
+const BOM = createToken({
+  name: 'BOM',
+  // eslint-disable-next-line no-control-regex
+  pattern: /\uFFEF/
+})
 const NewLine = createToken({
   name: 'NewLine',
   // eslint-disable-next-line no-control-regex
@@ -87,6 +92,7 @@ const tokens = {
   modes: {
     main: [
       WhiteSpace,
+      BOM,
       NewLine,
       BlockComment,
       LineComment,
@@ -151,13 +157,12 @@ class KdlParser extends EmbeddedActionsParser {
         {
           ALT: () => {
             this.CONSUME(BlockComment)
-            this.OPTION1(() => this.CONSUME1(WhiteSpace))
+            this.OPTION1(() => this.SUBRULE(this.nodeSpace))
             this.SUBRULE(this.node)
           }
         },
         { ALT: () => this.SUBRULE(this.lineComment) },
-        { ALT: () => this.SUBRULE(this.multilineComment) },
-        { ALT: () => this.CONSUME(WhiteSpace) },
+        { ALT: () => this.SUBRULE(this.whiteSpace) },
         { ALT: () => this.CONSUME(NewLine) },
         { ALT: () => nodes.push(this.SUBRULE1(this.node)) }
       ]))
@@ -188,6 +193,22 @@ class KdlParser extends EmbeddedActionsParser {
           {
             GATE: this.BACKTRACK(this.value),
             ALT: () => values.push(this.SUBRULE(this.value))
+          },
+          {
+            ALT: () => {
+              this.CONSUME(BlockComment)
+              this.OPTION2(() => this.SUBRULE(this.nodeSpace))
+              this.OR([
+                {
+                  GATE: this.BACKTRACK(this.property),
+                  ALT: () => this.SUBRULE1(this.property)
+                },
+                {
+                  GATE: this.BACKTRACK(this.value),
+                  ALT: () => this.SUBRULE1(this.value)
+                }
+              ])
+            }
           }
         ])
 
@@ -209,6 +230,15 @@ class KdlParser extends EmbeddedActionsParser {
         {
           ALT: () => {
             this.SUBRULE1(this.nodeTerminator)
+            return []
+          }
+        },
+        {
+          ALT: () => {
+            this.CONSUME1(BlockComment)
+            this.OPTION3(() => this.SUBRULE1(this.nodeSpace))
+            this.SUBRULE1(this.nodeChildren)
+            this.OPTION4(() => this.SUBRULE2(this.nodeTerminator))
             return []
           }
         }
@@ -248,31 +278,13 @@ class KdlParser extends EmbeddedActionsParser {
 
     this.RULE('nodeSpace', () => {
       this.AT_LEAST_ONE(() => this.OR([
-        { ALT: () => this.CONSUME(WhiteSpace) },
-        { ALT: () => this.SUBRULE(this.multilineComment) },
+        { ALT: () => this.SUBRULE(this.whiteSpace) },
         {
           ALT: () => {
             this.CONSUME(EscLine)
-            this.OPTION(() => this.CONSUME1(WhiteSpace))
+            this.OPTION(() => this.SUBRULE1(this.whiteSpace))
             this.OPTION1(() => this.CONSUME(LineComment))
             this.CONSUME(NewLine)
-          }
-        },
-        {
-          ALT: () => {
-            this.CONSUME(BlockComment)
-            this.OPTION2(() => this.CONSUME2(WhiteSpace))
-            this.OR2([
-              {
-                GATE: this.BACKTRACK(this.property),
-                ALT: () => this.SUBRULE(this.property)
-              },
-              {
-                GATE: this.BACKTRACK(this.value),
-                ALT: () => this.SUBRULE(this.value)
-              },
-              { ALT: () => this.SUBRULE(this.nodeChildren) }
-            ])
           }
         }
       ]))
@@ -359,6 +371,16 @@ class KdlParser extends EmbeddedActionsParser {
         ])
       })
       this.CONSUME(CloseMultiLineComment)
+    })
+
+    this.RULE('whiteSpace', () => {
+      this.AT_LEAST_ONE(() => {
+        this.OR([
+          { ALT: () => this.CONSUME(BOM) },
+          { ALT: () => this.CONSUME(WhiteSpace) },
+          { ALT: () => this.SUBRULE(this.multilineComment) }
+        ])
+      })
     })
 
     this.performSelfAnalysis()
