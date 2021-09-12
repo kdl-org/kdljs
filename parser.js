@@ -292,6 +292,7 @@ class KdlParser extends EmbeddedActionsParser {
 
     this.RULE('nodeTerminator', () => {
       this.OR([
+        { ALT: () => this.SUBRULE(this.lineComment) },
         { ALT: () => this.CONSUME(NewLine) },
         { ALT: () => this.CONSUME(SemiColon) },
         { ALT: () => this.CONSUME(EOF) }
