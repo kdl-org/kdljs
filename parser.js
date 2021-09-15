@@ -21,13 +21,13 @@ const BOM = createToken({
 const NewLine = createToken({
   name: 'NewLine',
   // eslint-disable-next-line no-control-regex
-  pattern: /\x0D\x0A|[\x0A\x0C\x85\u2028\u2029]/
+  pattern: /\x0D\x0A|[\x0A\x0C\x0D\x85\u2028\u2029]/
 })
 const BlockComment = createToken({ name: 'BlockComment', pattern: /\/-/ })
 const LineComment = createToken({
   name: 'LineComment',
   // eslint-disable-next-line no-control-regex
-  pattern: /\/\/(\x0D(?!\x0A)|[^\x0A\x0C\x0D\x85\u2028\u2029])*/,
+  pattern: /\/\/[^\x0A\x0C\x0D\x85\u2028\u2029]*/,
   line_breaks: true
 })
 const OpenMultiLineComment = createToken({
