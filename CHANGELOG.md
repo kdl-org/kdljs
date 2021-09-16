@@ -1,3 +1,12 @@
+## [0.1.1](https://github.com/kdl-org/kdljs/compare/v0.1.0...v0.1.1) (2021-09-16)
+
+
+### Bug Fixes
+
+* **formatter:** fix bare idents in output ([09a6ba6](https://github.com/kdl-org/kdljs/commit/09a6ba6a3019b0a3ae77771c40eba363ffa6d9db))
+
+
+
 # [0.1.0](https://github.com/kdl-org/kdljs/compare/v0.1.0-rc.2...v0.1.0) (2021-09-16)
 
 
