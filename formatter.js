@@ -77,7 +77,7 @@ function formatString (value, options) {
  * @return {string}
  */
 function formatIdentifier (value, options) {
-  if (/^[\x21-\x2F\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21-\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*$/.test(value)) {
+  if (/^(?![+-]\d)[\x21\x23-\x27\x2A\x2B\x2D\x2E\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*$/.test(value)) {
     return value
   } else {
     return formatString(value, options)
