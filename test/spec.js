@@ -53,7 +53,8 @@ const KDL4J_BROKEN_TESTS = new Set([
   'underscore_in_fraction.kdl',
 
   // This was supported but is no longer
-  'unusual_chars_in_bare_id.kdl'
+  'unusual_chars_in_bare_id.kdl',
+  'unusual_bare_id_chars_in_quoted_id.kdl'
 ])
 
 const KDL4J_BROKEN_OUTPUT_TESTS = new Set([
