@@ -1,3 +1,14 @@
+# [0.1.0](https://github.com/kdl-org/kdljs/compare/v0.1.0-rc.2...v0.1.0) (2021-09-16)
+
+
+### Bug Fixes
+
+* **parser:** allow line comment as node terminator ([fb8d9e1](https://github.com/kdl-org/kdljs/commit/fb8d9e199da5ed04da86f9e75ae5a058909aa75d))
+* **parser:** do not include non ident chars in idents ([#8](https://github.com/kdl-org/kdljs/issues/8)) ([e5e38ef](https://github.com/kdl-org/kdljs/commit/e5e38ef3ca0ecde7be007cae6bbe39f623fa0adf))
+* **parser:** treat standalone carriage return as newline ([#7](https://github.com/kdl-org/kdljs/issues/7)) ([6f00292](https://github.com/kdl-org/kdljs/commit/6f00292fe30a55411372efb0aea05d9512296576))
+
+
+
 # [0.1.0-rc.2](https://github.com/kdl-org/kdljs/compare/v0.1.0-rc.1...v0.1.0-rc.2) (2021-09-11)
 
 
