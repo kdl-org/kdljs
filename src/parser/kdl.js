@@ -1,127 +1,46 @@
-/** @module kdljs/parser */
+/**
+ * @namespace kdl
+ * @memberof module:kdljs.parser
+ */
 
-const {
-  createToken,
-  Lexer,
-  EmbeddedActionsParser,
-  EOF
-} = require('chevrotain')
-
-// Whitespace and comments
-const WhiteSpace = createToken({
-  name: 'WhiteSpace',
-  // eslint-disable-next-line no-control-regex
-  pattern: /[\x09\x20\xA0\u1680\u2000-\u200A\u202F\u205F\u3000]+/
-})
-const BOM = createToken({
-  name: 'BOM',
-  // eslint-disable-next-line no-control-regex
-  pattern: /\uFFEF/
-})
-const NewLine = createToken({
-  name: 'NewLine',
-  // eslint-disable-next-line no-control-regex
-  pattern: /\x0D\x0A|[\x0A\x0C\x0D\x85\u2028\u2029]/
-})
-const BlockComment = createToken({ name: 'BlockComment', pattern: /\/-/ })
-const LineComment = createToken({
-  name: 'LineComment',
-  // eslint-disable-next-line no-control-regex
-  pattern: /\/\/[^\x0A\x0C\x0D\x85\u2028\u2029]*/,
-  line_breaks: true
-})
-const OpenMultiLineComment = createToken({
-  name: 'OpenMultiLineComment',
-  pattern: /\/\*/,
-  push_mode: 'multilineComment'
-})
-const MultiLineCommentContent = createToken({
-  name: 'MultiLineCommentContent',
-  pattern: /([^/*]+|\*|\/)/,
-  line_breaks: true
-})
-const CloseMultiLineComment = createToken({
-  name: 'CloseMultiLineComment',
-  pattern: /\*\//,
-  pop_mode: 'multilineComment'
-})
-
-// Values
-const Boolean = createToken({ name: 'Boolean', pattern: /true|false/ })
-const Null = createToken({ name: 'Null', pattern: /null/ })
-const RawString = createToken({
-  name: 'RawString',
-  pattern: /r(#*)"[^]*?"\1/,
-  line_breaks: true
-})
-const Float = createToken({
-  name: 'Float',
-  pattern: /[+-]?[0-9][0-9_]*(\.[0-9][0-9_]*)?([eE][+-]?[0-9][0-9_]*)?/
-})
-const Integer = createToken({
-  name: 'Integer',
-  pattern: /[+-]?(0x[0-9a-fA-F][0-9a-fA-F_]*|0o[0-7][0-7_]*|0b[01][01_]*)/
-})
-
-// Other
-const Identifier = createToken({
-  name: 'Identifier',
-  pattern: /(?![+-]\d)[\x21\x23-\x27\x2A\x2B\x2D\x2E\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*/
-})
-const SemiColon = createToken({ name: 'SemiColon', pattern: /;/ })
-const Equals = createToken({ name: 'Equals', pattern: /=/ })
-const LeftBrace = createToken({ name: 'LeftBrace', pattern: /\{/ })
-const RightBrace = createToken({ name: 'RightBrace', pattern: /\}/ })
-const LeftParenthesis = createToken({ name: 'LeftParenthesis', pattern: /\(/ })
-const RightParenthesis = createToken({ name: 'RightParenthesis', pattern: /\)/ })
-const EscLine = createToken({ name: 'EscLine', pattern: /\\/ })
-
-// String
-const OpenQuote = createToken({ name: 'OpenQuote', pattern: /"/, push_mode: 'string' })
-const Unicode = createToken({
-  name: 'Unicode',
-  pattern: /[^\\"]+/,
-  line_breaks: true
-})
-const Escape = createToken({ name: 'Escape', pattern: /\\[nrt\\/"bf]/ })
-const UnicodeEscape = createToken({ name: 'UnicodeEscape', pattern: /\\u\{[0-9a-fA-F]{1,6}\}/ })
-const CloseQuote = createToken({ name: 'CloseQuote', pattern: /"/, pop_mode: true })
+const { Lexer, EmbeddedActionsParser } = require('chevrotain')
+const Tokens = require('./tokens.js')
 
 const tokens = {
   defaultMode: 'main',
   modes: {
     main: [
-      WhiteSpace,
-      BOM,
-      NewLine,
-      BlockComment,
-      LineComment,
-      OpenMultiLineComment,
-      Boolean,
-      Null,
-      RawString,
-      Integer,
-      Float,
-      SemiColon,
-      Equals,
-      LeftBrace,
-      RightBrace,
-      LeftParenthesis,
-      RightParenthesis,
-      EscLine,
-      OpenQuote,
-      Identifier
+      Tokens.WhiteSpace,
+      Tokens.BOM,
+      Tokens.NewLine,
+      Tokens.BlockComment,
+      Tokens.LineComment,
+      Tokens.OpenMultiLineComment,
+      Tokens.Boolean,
+      Tokens.Null,
+      Tokens.RawString,
+      Tokens.Integer,
+      Tokens.Float,
+      Tokens.SemiColon,
+      Tokens.Equals,
+      Tokens.LeftBrace,
+      Tokens.RightBrace,
+      Tokens.LeftParenthesis,
+      Tokens.RightParenthesis,
+      Tokens.EscLine,
+      Tokens.OpenQuote,
+      Tokens.Identifier
     ],
     multilineComment: [
-      OpenMultiLineComment,
-      CloseMultiLineComment,
-      MultiLineCommentContent
+      Tokens.OpenMultiLineComment,
+      Tokens.CloseMultiLineComment,
+      Tokens.MultiLineCommentContent
     ],
     string: [
-      Unicode,
-      Escape,
-      UnicodeEscape,
-      CloseQuote
+      Tokens.Unicode,
+      Tokens.Escape,
+      Tokens.UnicodeEscape,
+      Tokens.CloseQuote
     ]
   }
 }
@@ -145,6 +64,7 @@ const radix = {
 
 /**
  * @class
+ * @memberof module:kdljs.parser.kdl
  */
 class KdlParser extends EmbeddedActionsParser {
   constructor () {
@@ -156,14 +76,14 @@ class KdlParser extends EmbeddedActionsParser {
       this.MANY(() => this.OR([
         {
           ALT: () => {
-            this.CONSUME(BlockComment)
+            this.CONSUME(Tokens.BlockComment)
             this.OPTION1(() => this.SUBRULE(this.nodeSpace))
             this.SUBRULE(this.node)
           }
         },
         { ALT: () => this.SUBRULE(this.lineComment) },
         { ALT: () => this.SUBRULE(this.whiteSpace) },
-        { ALT: () => this.CONSUME(NewLine) },
+        { ALT: () => this.CONSUME(Tokens.NewLine) },
         { ALT: () => nodes.push(this.SUBRULE1(this.node)) }
       ]))
 
@@ -177,7 +97,7 @@ class KdlParser extends EmbeddedActionsParser {
       const values = []
 
       const next = this.LA(1).tokenType
-      if (next !== NewLine && next !== SemiColon && next !== EOF) {
+      if (next !== Tokens.NewLine && next !== Tokens.SemiColon && next !== Tokens.EOF) {
         this.SUBRULE(this.nodeSpace)
       }
 
@@ -196,7 +116,7 @@ class KdlParser extends EmbeddedActionsParser {
           },
           {
             ALT: () => {
-              this.CONSUME(BlockComment)
+              this.CONSUME(Tokens.BlockComment)
               this.OPTION2(() => this.SUBRULE(this.nodeSpace))
               this.OR([
                 {
@@ -213,8 +133,8 @@ class KdlParser extends EmbeddedActionsParser {
         ])
 
         const next = this.LA(1).tokenType
-        if (next !== LeftBrace && next !== NewLine &&
-            next !== SemiColon && next !== EOF) {
+        if (next !== Tokens.LeftBrace && next !== Tokens.NewLine &&
+            next !== Tokens.SemiColon && next !== Tokens.EOF) {
           this.SUBRULE1(this.nodeSpace)
         }
       })
@@ -235,7 +155,7 @@ class KdlParser extends EmbeddedActionsParser {
         },
         {
           ALT: () => {
-            this.CONSUME1(BlockComment)
+            this.CONSUME1(Tokens.BlockComment)
             this.OPTION3(() => this.SUBRULE1(this.nodeSpace))
             this.SUBRULE1(this.nodeChildren)
             this.OPTION4(() => this.SUBRULE2(this.nodeTerminator))
@@ -249,30 +169,30 @@ class KdlParser extends EmbeddedActionsParser {
 
     this.RULE('identifier', () => {
       return this.OR([
-        { ALT: () => this.CONSUME(Identifier).image },
+        { ALT: () => this.CONSUME(Tokens.Identifier).image },
         { ALT: () => this.SUBRULE(this.string) },
         { ALT: () => this.SUBRULE(this.rawString) }
       ])
     })
 
     this.RULE('tag', () => {
-      this.CONSUME(LeftParenthesis)
+      this.CONSUME(Tokens.LeftParenthesis)
       const tag = this.SUBRULE(this.identifier)
-      this.CONSUME(RightParenthesis)
+      this.CONSUME(Tokens.RightParenthesis)
       return tag
     })
 
     this.RULE('property', () => {
       const key = this.SUBRULE(this.identifier)
-      this.CONSUME(Equals)
+      this.CONSUME(Tokens.Equals)
       const value = this.SUBRULE(this.value)
       return [key, value]
     })
 
     this.RULE('nodeChildren', () => {
-      this.CONSUME(LeftBrace)
+      this.CONSUME(Tokens.LeftBrace)
       const nodes = this.SUBRULE(this.nodes)
-      this.CONSUME(RightBrace)
+      this.CONSUME(Tokens.RightBrace)
       return nodes
     })
 
@@ -281,10 +201,10 @@ class KdlParser extends EmbeddedActionsParser {
         { ALT: () => this.SUBRULE(this.whiteSpace) },
         {
           ALT: () => {
-            this.CONSUME(EscLine)
+            this.CONSUME(Tokens.EscLine)
             this.OPTION(() => this.SUBRULE1(this.whiteSpace))
-            this.OPTION1(() => this.CONSUME(LineComment))
-            this.CONSUME(NewLine)
+            this.OPTION1(() => this.CONSUME(Tokens.LineComment))
+            this.CONSUME(Tokens.NewLine)
           }
         }
       ]))
@@ -293,9 +213,9 @@ class KdlParser extends EmbeddedActionsParser {
     this.RULE('nodeTerminator', () => {
       this.OR([
         { ALT: () => this.SUBRULE(this.lineComment) },
-        { ALT: () => this.CONSUME(NewLine) },
-        { ALT: () => this.CONSUME(SemiColon) },
-        { ALT: () => this.CONSUME(EOF) }
+        { ALT: () => this.CONSUME(Tokens.NewLine) },
+        { ALT: () => this.CONSUME(Tokens.SemiColon) },
+        { ALT: () => this.CONSUME(Tokens.EOF) }
       ])
     })
 
@@ -303,22 +223,22 @@ class KdlParser extends EmbeddedActionsParser {
       this.OPTION(() => this.SUBRULE(this.tag))
       return this.OR([
         { ALT: () => this.SUBRULE(this.string) },
-        { ALT: () => this.CONSUME(Boolean).image === 'true' },
+        { ALT: () => this.CONSUME(Tokens.Boolean).image === 'true' },
         {
           ALT: () => {
-            this.CONSUME(Null)
+            this.CONSUME(Tokens.Null)
             return null
           }
         },
         {
           ALT: () => {
-            const number = this.CONSUME(Float).image.replace(/_/g, '')
+            const number = this.CONSUME(Tokens.Float).image.replace(/_/g, '')
             return parseFloat(number, 10)
           }
         },
         {
           ALT: () => {
-            const token = this.CONSUME(Integer).image
+            const token = this.CONSUME(Tokens.Integer).image
             const sign = token.startsWith('-') ? -1 : 1
             const number = token.replace(/^[+-]?0|_/g, '')
             return sign * parseInt(number.slice(1), radix[number[0]])
@@ -331,54 +251,54 @@ class KdlParser extends EmbeddedActionsParser {
     this.RULE('string', () => {
       let string = ''
 
-      this.CONSUME(OpenQuote)
+      this.CONSUME(Tokens.OpenQuote)
       this.MANY(() => {
         string += this.OR([
-          { ALT: () => this.CONSUME(Unicode).image },
-          { ALT: () => escapes[this.CONSUME(Escape).image] },
+          { ALT: () => this.CONSUME(Tokens.Unicode).image },
+          { ALT: () => escapes[this.CONSUME(Tokens.Escape).image] },
           {
             ALT: () => {
-              const escape = this.CONSUME(UnicodeEscape).image.slice(3, -1)
+              const escape = this.CONSUME(Tokens.UnicodeEscape).image.slice(3, -1)
               return String.fromCharCode(parseInt(escape, 16))
             }
           }
         ])
       })
-      this.CONSUME(CloseQuote)
+      this.CONSUME(Tokens.CloseQuote)
 
       return string
     })
 
     this.RULE('rawString', () => {
-      const string = this.CONSUME(RawString).image
+      const string = this.CONSUME(Tokens.RawString).image
       const start = string.indexOf('"')
       return string.slice(start + 1, -start)
     })
 
     this.RULE('lineComment', () => {
-      this.CONSUME(LineComment)
+      this.CONSUME(Tokens.LineComment)
       this.OR([
-        { ALT: () => this.CONSUME(NewLine) },
-        { ALT: () => this.CONSUME(EOF) }
+        { ALT: () => this.CONSUME(Tokens.NewLine) },
+        { ALT: () => this.CONSUME(Tokens.EOF) }
       ])
     })
 
     this.RULE('multilineComment', () => {
-      this.CONSUME(OpenMultiLineComment)
+      this.CONSUME(Tokens.OpenMultiLineComment)
       this.MANY(() => {
         this.OR([
-          { ALT: () => this.CONSUME(MultiLineCommentContent) },
+          { ALT: () => this.CONSUME(Tokens.MultiLineCommentContent) },
           { ALT: () => this.SUBRULE(this.multilineComment) }
         ])
       })
-      this.CONSUME(CloseMultiLineComment)
+      this.CONSUME(Tokens.CloseMultiLineComment)
     })
 
     this.RULE('whiteSpace', () => {
       this.AT_LEAST_ONE(() => {
         this.OR([
-          { ALT: () => this.CONSUME(BOM) },
-          { ALT: () => this.CONSUME(WhiteSpace) },
+          { ALT: () => this.CONSUME(Tokens.BOM) },
+          { ALT: () => this.CONSUME(Tokens.WhiteSpace) },
           { ALT: () => this.SUBRULE(this.multilineComment) }
         ])
       })
@@ -416,12 +336,14 @@ class KdlParser extends EmbeddedActionsParser {
 
 const lexer = new Lexer(tokens)
 /**
- * @constant {module:kdljs/parser~KdlParser}
+ * @constant {module:kdljs.parser.kdl.KdlParser}
+ * @memberof module:kdljs.parser.kdl
  */
 const parser = new KdlParser()
 
 /**
- * @typedef parseResult
+ * @typedef ParseResult
+ * @memberof module:kdljs.parser.kdl
  * @type {Object}
  * @property {Array} errors - Parsing errors
  * @property {module:kdljs~Document} output - KDL Document
@@ -429,8 +351,9 @@ const parser = new KdlParser()
 
 /**
  * @function parse
+ * @memberof module:kdljs.parser.kdl
  * @param {string} text - Input KDL file (or fragment)
- * @return {module:kdljs/parser~parseResult} Output
+ * @return {module:kdljs.parser.kdl.ParseResult} Output
  */
 module.exports.parse = function parse (text) {
   parser.input = lexer.tokenize(text).tokens

@@ -1,7 +1,10 @@
-/** @module kdljs/validator */
+/**
+ * @namespace validator
+ * @memberof module:kdljs
+ */
 
 /**
- * @access private
+ * @memberof module:kdljs.validator
  * @param {module:kdljs~Document} doc - KDL document
  * @return {boolean}
  */
@@ -11,6 +14,7 @@ function validateDocument (doc) {
 
 /**
  * @access private
+ * @memberof module:kdljs.validator
  * @param {module:kdljs~Node} node - KDL node
  * @return {boolean}
  */
@@ -46,6 +50,7 @@ function validateNode (node) {
 
 /**
  * @access private
+ * @memberof module:kdljs.validator
  * @param {module:kdljs~Value} value - KDL value
  * @return {boolean}
  */

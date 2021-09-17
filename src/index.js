@@ -1,11 +1,11 @@
 /**
  * @module kdljs
- * @borrows module:kdljs/parser~parse as parse
- * @borrows module:kdljs/formatter~format as format
- * @borrows module:kdljs/validator~validateDocument as validateDocument
+ * @borrows module:kdljs.parser.kdl.parse as parse
+ * @borrows module:kdljs.formatter.format as format
+ * @borrows module:kdljs.validator.validateDocument as validateDocument
  */
 
-const { parse } = require('./parser.js')
+const { parse } = require('./parser/index.js')
 const { format } = require('./formatter.js')
 const { validateDocument } = require('./validator.js')
 

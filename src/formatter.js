@@ -1,4 +1,7 @@
-/** @module kdljs/formatter */
+/**
+ * @namespace formatter
+ * @memberof module:kdljs
+ */
 
 const { validateDocument } = require('./validator.js')
 
@@ -20,8 +23,9 @@ const commonEscapes = {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {string} char
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {boolean}
  */
 function shouldEscapeChar (value, options) {
@@ -46,8 +50,9 @@ function shouldEscapeChar (value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {string} char
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
 function formatChar (value, options) {
@@ -62,8 +67,9 @@ function formatChar (value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {string} value
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
 function formatString (value, options) {
@@ -72,8 +78,9 @@ function formatString (value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {string} value
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
 function formatIdentifier (value, options) {
@@ -86,8 +93,9 @@ function formatIdentifier (value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {module:kdljs~Value} value - KDL value
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
 function formatValue (value, options) {
@@ -102,9 +110,10 @@ function formatValue (value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {string} key
  * @param {module:kdljs~Value} value - KDL value
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
 function formatProperty (key, value, options) {
@@ -113,8 +122,9 @@ function formatProperty (key, value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {module:kdljs~Node} node - KDL node
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @param {number} indent
  * @return {string}
  */
@@ -149,8 +159,9 @@ function formatNode (node, options, indent) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {module:kdljs~Document} doc - KDL document
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @param {number} indent
  * @return {string}
  */
@@ -163,6 +174,7 @@ function formatDocument (doc, options, indent) {
 /**
  * @access private
  * @typedef ProcessedOptions
+ * @memberof module:kdljs.formatter
  * @type {Object}
  * @property {Object<number,boolean>} escapes
  * @property {boolean} requireSemicolons
@@ -181,8 +193,9 @@ function formatDocument (doc, options, indent) {
 
 /**
  * @access private
- * @param {module:kdljs/formatter~Options} options - Formatting options
- * @return {module:kdljs/formatter~ProcessedOptions}
+ * @memberof module:kdljs.formatter
+ * @param {module:kdljs/formatter.Options} options - Formatting options
+ * @return {module:kdljs/formatter.ProcessedOptions}
  */
 function processOptions (options) {
   return {
@@ -205,6 +218,7 @@ function processOptions (options) {
 
 /**
  * @typedef Options
+ * @memberof module:kdljs.formatter
  * @type {Object}
  * @property {Object<number,boolean>} [escapes={}] - A map of which characters to escape (by decimal codepoint)
  * @property {boolean} [requireSemicolons=false] - Whether to print semicolons after each node
@@ -223,8 +237,9 @@ function processOptions (options) {
 
 /**
  * @function format
+ * @memberof module:kdljs.formatter
  * @param {module:kdljs~Document} doc - Input KDL document
- * @param {module:kdljs/formatter~Options} [options={}] - Formatting options
+ * @param {module:kdljs.formatter.Options} [options={}] - Formatting options
  * @return {string} formatted KDL file
  */
 module.exports.format = function format (doc, options) {
