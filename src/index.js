@@ -8,7 +8,7 @@
 
 const { parse } = require('./parser/index.js')
 const { format } = require('./formatter.js')
-const { query } = require('./query.js')
+const { query } = require('./queryEngine.js')
 const { validateDocument } = require('./validator.js')
 
 /**
