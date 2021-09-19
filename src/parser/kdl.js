@@ -3,7 +3,8 @@
  * @memberof module:kdljs.parser
  */
 
-const { Lexer, EmbeddedActionsParser } = require('chevrotain')
+const { Lexer } = require('chevrotain')
+const { BaseParser } = require('./base.js')
 const Tokens = require('./tokens.js')
 
 const tokens = {
@@ -45,31 +46,21 @@ const tokens = {
   }
 }
 
-const escapes = {
-  '\\n': '\n',
-  '\\r': '\r',
-  '\\t': '\t',
-  '\\\\': '\\',
-  '\\/': '/',
-  '\\"': '"',
-  '\\b': '\x08',
-  '\\f': '\x0C'
-}
-
-const radix = {
-  b: 2,
-  o: 8,
-  x: 16
-}
-
 /**
  * @class
+ * @extends module:kdljs.parser.base.BaseParser
  * @memberof module:kdljs.parser.kdl
  */
-class KdlParser extends EmbeddedActionsParser {
+class KdlParser extends BaseParser {
   constructor () {
     super(tokens)
 
+    /**
+     * Consume a KDL document
+     * @method #nodes
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     * @return {module:kdljs~Document}
+     */
     this.RULE('nodes', () => {
       const nodes = []
 
@@ -90,6 +81,12 @@ class KdlParser extends EmbeddedActionsParser {
       return nodes
     })
 
+    /**
+     * Consume a KDL node
+     * @method #node
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     * @return {module:kdljs~Node}
+     */
     this.RULE('node', () => {
       this.OPTION1(() => this.SUBRULE(this.tag))
       const name = this.SUBRULE(this.identifier)
@@ -111,8 +108,8 @@ class KdlParser extends EmbeddedActionsParser {
             }
           },
           {
-            GATE: this.BACKTRACK(this.value),
-            ALT: () => values.push(this.SUBRULE(this.value))
+            GATE: this.BACKTRACK(this.taggedValue),
+            ALT: () => values.push(this.SUBRULE(this.taggedValue))
           },
           {
             ALT: () => {
@@ -124,8 +121,8 @@ class KdlParser extends EmbeddedActionsParser {
                   ALT: () => this.SUBRULE1(this.property)
                 },
                 {
-                  GATE: this.BACKTRACK(this.value),
-                  ALT: () => this.SUBRULE1(this.value)
+                  GATE: this.BACKTRACK(this.taggedValue),
+                  ALT: () => this.SUBRULE1(this.taggedValue)
                 }
               ])
             }
@@ -167,28 +164,36 @@ class KdlParser extends EmbeddedActionsParser {
       return { name, properties, values, children }
     })
 
-    this.RULE('identifier', () => {
-      return this.OR([
-        { ALT: () => this.CONSUME(Tokens.Identifier).image },
-        { ALT: () => this.SUBRULE(this.string) },
-        { ALT: () => this.SUBRULE(this.rawString) }
-      ])
-    })
-
-    this.RULE('tag', () => {
-      this.CONSUME(Tokens.LeftParenthesis)
-      const tag = this.SUBRULE(this.identifier)
-      this.CONSUME(Tokens.RightParenthesis)
-      return tag
-    })
-
+    /**
+     * Consume a property
+     * @method #property
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     * @return {Array<string,module:kdljs~Value>} key-value pair
+     */
     this.RULE('property', () => {
       const key = this.SUBRULE(this.identifier)
       this.CONSUME(Tokens.Equals)
-      const value = this.SUBRULE(this.value)
+      const value = this.SUBRULE(this.taggedValue)
       return [key, value]
     })
 
+    /**
+     * Consume a tagged value
+     * @method #taggedValue
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     * @return {module:kdljs~Value}
+     */
+    this.RULE('taggedValue', () => {
+      this.OPTION(() => this.SUBRULE(this.tag))
+      return this.SUBRULE(this.value)
+    })
+
+    /**
+     * Consume node children
+     * @method #nodeChildren
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     * @return {module:kdljs~Document}
+     */
     this.RULE('nodeChildren', () => {
       this.CONSUME(Tokens.LeftBrace)
       const nodes = this.SUBRULE(this.nodes)
@@ -196,6 +201,11 @@ class KdlParser extends EmbeddedActionsParser {
       return nodes
     })
 
+    /**
+     * Consume a node pace
+     * @method #nodeSpace
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     */
     this.RULE('nodeSpace', () => {
       this.AT_LEAST_ONE(() => this.OR([
         { ALT: () => this.SUBRULE(this.whiteSpace) },
@@ -210,6 +220,11 @@ class KdlParser extends EmbeddedActionsParser {
       ]))
     })
 
+    /**
+     * Consume a node terminator
+     * @method #nodeTerminator
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     */
     this.RULE('nodeTerminator', () => {
       this.OR([
         { ALT: () => this.SUBRULE(this.lineComment) },
@@ -219,62 +234,11 @@ class KdlParser extends EmbeddedActionsParser {
       ])
     })
 
-    this.RULE('value', () => {
-      this.OPTION(() => this.SUBRULE(this.tag))
-      return this.OR([
-        { ALT: () => this.SUBRULE(this.string) },
-        { ALT: () => this.CONSUME(Tokens.Boolean).image === 'true' },
-        {
-          ALT: () => {
-            this.CONSUME(Tokens.Null)
-            return null
-          }
-        },
-        {
-          ALT: () => {
-            const number = this.CONSUME(Tokens.Float).image.replace(/_/g, '')
-            return parseFloat(number, 10)
-          }
-        },
-        {
-          ALT: () => {
-            const token = this.CONSUME(Tokens.Integer).image
-            const sign = token.startsWith('-') ? -1 : 1
-            const number = token.replace(/^[+-]?0|_/g, '')
-            return sign * parseInt(number.slice(1), radix[number[0]])
-          }
-        },
-        { ALT: () => this.SUBRULE(this.rawString) }
-      ])
-    })
-
-    this.RULE('string', () => {
-      let string = ''
-
-      this.CONSUME(Tokens.OpenQuote)
-      this.MANY(() => {
-        string += this.OR([
-          { ALT: () => this.CONSUME(Tokens.Unicode).image },
-          { ALT: () => escapes[this.CONSUME(Tokens.Escape).image] },
-          {
-            ALT: () => {
-              const escape = this.CONSUME(Tokens.UnicodeEscape).image.slice(3, -1)
-              return String.fromCharCode(parseInt(escape, 16))
-            }
-          }
-        ])
-      })
-      this.CONSUME(Tokens.CloseQuote)
-
-      return string
-    })
-
-    this.RULE('rawString', () => {
-      const string = this.CONSUME(Tokens.RawString).image
-      const start = string.indexOf('"')
-      return string.slice(start + 1, -start)
-    })
-
+    /**
+     * Consume a line comment
+     * @method #lineComment
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     */
     this.RULE('lineComment', () => {
       this.CONSUME(Tokens.LineComment)
       this.OR([
@@ -283,6 +247,11 @@ class KdlParser extends EmbeddedActionsParser {
       ])
     })
 
+    /**
+     * Consume a multiline comment
+     * @method #multilineComment
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     */
     this.RULE('multilineComment', () => {
       this.CONSUME(Tokens.OpenMultiLineComment)
       this.MANY(() => {
@@ -294,6 +263,11 @@ class KdlParser extends EmbeddedActionsParser {
       this.CONSUME(Tokens.CloseMultiLineComment)
     })
 
+    /**
+     * Consume whitespace
+     * @method #whiteSpace
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     */
     this.RULE('whiteSpace', () => {
       this.AT_LEAST_ONE(() => {
         this.OR([
@@ -305,32 +279,6 @@ class KdlParser extends EmbeddedActionsParser {
     })
 
     this.performSelfAnalysis()
-  }
-
-  /**
-   * @method
-   * @param {string} input - Input KDL file (or fragment)
-   * @param {Object} error
-   * @param {string} [message] - Override the error message
-   * @param {Object} [options] - Further configuration
-   * @param {number} [options.context=3] - How many lines before the problematic line to include
-   */
-  formatError (input, error, message = error.message, { context = 3 } = {}) {
-    let output = message + '\n'
-
-    const { startLine, endLine, startColumn, endColumn } = error.token
-    const lines = input.split('\n')
-    output += lines.slice(startLine - Math.min(startLine, context), endLine).join('\n')
-    output += '\n'
-
-    output += ' '.repeat(startColumn - 1) + '^'.repeat(endColumn - startColumn + 1)
-    output += ` at ${startLine}:${startColumn}\n`
-
-    output += error.context.ruleStack
-      .map(rule => '  ' + rule)
-      .join('\n')
-
-    return output
   }
 }
 
