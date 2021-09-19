@@ -2,11 +2,13 @@
  * @module kdljs
  * @borrows module:kdljs.parser.kdl.parse as parse
  * @borrows module:kdljs.formatter.format as format
+ * @borrows module:kdljs.queryEngine.query as query
  * @borrows module:kdljs.validator.validateDocument as validateDocument
  */
 
 const { parse } = require('./parser/index.js')
 const { format } = require('./formatter.js')
+const { query } = require('./query.js')
 const { validateDocument } = require('./validator.js')
 
 /**
@@ -34,6 +36,14 @@ const { validateDocument } = require('./validator.js')
  * @type {(string|number|boolean|null)}
  */
 
+/**
+ * A {@link https://github.com/kdl-org/kdl/blob/main/QUERY-SPEC.md|Query string}.
+ *
+ * @typedef QueryString
+ * @type {string}
+ */
+
 module.exports.parse = parse
 module.exports.format = format
+module.exports.query = query
 module.exports.validateDocument = validateDocument

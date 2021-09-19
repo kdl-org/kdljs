@@ -80,6 +80,27 @@ const Escape = createToken({ name: 'Escape', pattern: /\\[nrt\\/"bf]/ })
 const UnicodeEscape = createToken({ name: 'UnicodeEscape', pattern: /\\u\{[0-9a-fA-F]{1,6}\}/ })
 const CloseQuote = createToken({ name: 'CloseQuote', pattern: /"/, pop_mode: true })
 
+// Query language
+const LeftBracket = createToken({ name: 'LeftBracket', pattern: /\[/ })
+const RightBracket = createToken({ name: 'RightBracket', pattern: /\]/ })
+const GreaterThan = createToken({ name: 'GreaterThan', pattern: />/ })
+const LessThan = createToken({ name: 'LessThan', pattern: /</ })
+const GreaterOrEqualThan = createToken({ name: 'GreaterOrEqualThan', pattern: />=/ })
+const LessOrEqualThan = createToken({ name: 'LessOrEqualThan', pattern: /<=/ })
+const Or = createToken({ name: 'Or', pattern: /\|\|/ })
+const AdjacentSibling = createToken({ name: 'AdjacentSibling', pattern: /\+/ })
+const Sibling = createToken({ name: 'Sibling', pattern: /~/ })
+const NotEquals = createToken({ name: 'NotEquals', pattern: /!=/ })
+const StartsWith = createToken({ name: 'StartsWith', pattern: /\^=/ })
+const EndsWith = createToken({ name: 'EndsWith', pattern: /\$=/ })
+const Contains = createToken({ name: 'Contains', pattern: /\*=/ })
+const Map = createToken({ name: 'Map', pattern: /=>/ })
+const TopAccessor = createToken({ name: 'TopAccessor', pattern: /top\(/ })
+const ValAccessor = createToken({ name: 'ValAccessor', pattern: /val\(/ })
+const PropAccessor = createToken({ name: 'PropAccessor', pattern: /prop\(/ })
+const Accessor = createToken({ name: 'Accessor', pattern: /(name|tag|values|props)\(/ })
+const Comma = createToken({ name: 'Comma', pattern: /,/ })
+
 module.exports = {
   WhiteSpace,
   BOM,
@@ -107,6 +128,25 @@ module.exports = {
   Escape,
   UnicodeEscape,
   CloseQuote,
+  LeftBracket,
+  RightBracket,
+  GreaterThan,
+  LessThan,
+  GreaterOrEqualThan,
+  LessOrEqualThan,
+  Or,
+  AdjacentSibling,
+  Sibling,
+  NotEquals,
+  StartsWith,
+  EndsWith,
+  Contains,
+  Map,
+  TopAccessor,
+  ValAccessor,
+  PropAccessor,
+  Accessor,
+  Comma,
 
   EOF
 }
