@@ -9,7 +9,7 @@ const WhiteSpace = createToken({
 const BOM = createToken({
   name: 'BOM',
   // eslint-disable-next-line no-control-regex
-  pattern: /\uFFEF/
+  pattern: /\uFEFF/
 })
 const NewLine = createToken({
   name: 'NewLine',
