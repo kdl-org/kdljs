@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: index.js</title>
+    <title>JSDoc: Source: validator.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: index.js</h1>
+    <h1 class="page-title">Source: validator.js</h1>
 
     
 
@@ -27,53 +27,66 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @module kdljs
- * @borrows module:kdljs.parser.kdl.parse as parse
- * @borrows module:kdljs.formatter.format as format
- * @borrows module:kdljs.queryEngine.query as query
- * @borrows module:kdljs.validator.validateDocument as validateDocument
- */
-
-const { parse } = require('./parser/index.js')
-const { format } = require('./formatter.js')
-const { query } = require('./queryEngine.js')
-const { validateDocument } = require('./validator.js')
-
-/**
- * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#document|Document}.
- *
- * @typedef Document
- * @type {Array&lt;module:kdljs~Node>}
+ * @namespace validator
+ * @memberof module:kdljs
  */
 
 /**
- * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#node|Node}.
- *
- * @typedef Node
- * @type {Object}
- * @property {string} name - The name of the Node
- * @property {Array&lt;module:kdljs~Value>} values - Collection of {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#argument|Arguments}
- * @property {Object&lt;string,module:kdljs~Value>} properties - Collection of {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#property|Properties}
- * @property {module:kdljs~Document} children - Nodes in the {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#children-block|Children block}
+ * @memberof module:kdljs.validator
+ * @param {module:kdljs~Document} doc - KDL document
+ * @return {boolean}
  */
+function validateDocument (doc) {
+  return Array.isArray(doc) &amp;&amp; doc.every(node => validateNode(node))
+}
 
 /**
- * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#value|Value}.
- *
- * @typedef Value
- * @type {(string|number|boolean|null)}
+ * @access private
+ * @memberof module:kdljs.validator
+ * @param {module:kdljs~Node} node - KDL node
+ * @return {boolean}
  */
+function validateNode (node) {
+  if (typeof node !== 'object') {
+    return false
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(node, 'name') ||
+      typeof node.name !== 'string') {
+    return false
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(node, 'values') ||
+      !Array.isArray(node.values) ||
+      !node.values.every(value => validateValue(value))) {
+    return false
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(node, 'properties') ||
+      typeof node.properties !== 'object' ||
+      !Object.values(node.properties).every(value => validateValue(value))) {
+    return false
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(node, 'children') ||
+      !validateDocument(node.children)) {
+    return false
+  }
+
+  return true
+}
 
 /**
- * A {@link https://github.com/kdl-org/kdl/blob/main/QUERY-SPEC.md|Query string}.
- *
- * @typedef QueryString
- * @type {string}
+ * @access private
+ * @memberof module:kdljs.validator
+ * @param {module:kdljs~Value} value - KDL value
+ * @return {boolean}
  */
+function validateValue (value) {
+  const type = typeof value
+  return type === 'string' || type === 'number' || type === 'boolean' || value === null
+}
 
-module.exports.parse = parse
-module.exports.format = format
-module.exports.query = query
 module.exports.validateDocument = validateDocument
 </code></pre>
         </article>

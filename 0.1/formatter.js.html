@@ -26,7 +26,10 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/** @module kdljs/formatter */
+            <pre class="prettyprint source linenums"><code>/**
+ * @namespace formatter
+ * @memberof module:kdljs
+ */
 
 const { validateDocument } = require('./validator.js')
 
@@ -48,8 +51,9 @@ const commonEscapes = {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {string} char
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {boolean}
  */
 function shouldEscapeChar (value, options) {
@@ -74,8 +78,9 @@ function shouldEscapeChar (value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {string} char
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
 function formatChar (value, options) {
@@ -90,8 +95,9 @@ function formatChar (value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {string} value
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
 function formatString (value, options) {
@@ -100,8 +106,9 @@ function formatString (value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {string} value
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
 function formatIdentifier (value, options) {
@@ -114,8 +121,9 @@ function formatIdentifier (value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {module:kdljs~Value} value - KDL value
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
 function formatValue (value, options) {
@@ -130,9 +138,10 @@ function formatValue (value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {string} key
  * @param {module:kdljs~Value} value - KDL value
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
 function formatProperty (key, value, options) {
@@ -141,8 +150,9 @@ function formatProperty (key, value, options) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {module:kdljs~Node} node - KDL node
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @param {number} indent
  * @return {string}
  */
@@ -177,8 +187,9 @@ function formatNode (node, options, indent) {
 
 /**
  * @access private
+ * @memberof module:kdljs.formatter
  * @param {module:kdljs~Document} doc - KDL document
- * @param {module:kdljs/formatter~ProcessedOptions} options - Formatting options
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @param {number} indent
  * @return {string}
  */
@@ -191,6 +202,7 @@ function formatDocument (doc, options, indent) {
 /**
  * @access private
  * @typedef ProcessedOptions
+ * @memberof module:kdljs.formatter
  * @type {Object}
  * @property {Object&lt;number,boolean>} escapes
  * @property {boolean} requireSemicolons
@@ -209,8 +221,9 @@ function formatDocument (doc, options, indent) {
 
 /**
  * @access private
- * @param {module:kdljs/formatter~Options} options - Formatting options
- * @return {module:kdljs/formatter~ProcessedOptions}
+ * @memberof module:kdljs.formatter
+ * @param {module:kdljs/formatter.Options} options - Formatting options
+ * @return {module:kdljs/formatter.ProcessedOptions}
  */
 function processOptions (options) {
   return {
@@ -233,6 +246,7 @@ function processOptions (options) {
 
 /**
  * @typedef Options
+ * @memberof module:kdljs.formatter
  * @type {Object}
  * @property {Object&lt;number,boolean>} [escapes={}] - A map of which characters to escape (by decimal codepoint)
  * @property {boolean} [requireSemicolons=false] - Whether to print semicolons after each node
@@ -251,8 +265,9 @@ function processOptions (options) {
 
 /**
  * @function format
+ * @memberof module:kdljs.formatter
  * @param {module:kdljs~Document} doc - Input KDL document
- * @param {module:kdljs/formatter~Options} [options={}] - Formatting options
+ * @param {module:kdljs.formatter.Options} [options={}] - Formatting options
  * @return {string} formatted KDL file
  */
 module.exports.format = function format (doc, options) {
@@ -274,13 +289,13 @@ module.exports.format = function format (doc, options) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-kdljs.html">kdljs</a></li><li><a href="module-kdljs_formatter.html">kdljs/formatter</a></li><li><a href="module-kdljs_parser.html">kdljs/parser</a></li></ul><h3>Classes</h3><ul><li><a href="module-kdljs_parser-KdlParser.html">KdlParser</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-kdljs.html">kdljs</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-kdljs.formatter.html">formatter</a></li><li><a href="module-kdljs.parser.html">parser</a></li><li><a href="module-kdljs.parser.base.html">base</a></li><li><a href="module-kdljs.parser.kdl.html">kdl</a></li><li><a href="module-kdljs.parser.kql.html">kql</a></li><li><a href="module-kdljs.queryEngine.html">queryEngine</a></li><li><a href="module-kdljs.validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-kdljs.parser.base.BaseParser.html">BaseParser</a></li><li><a href="module-kdljs.parser.kdl.KdlParser.html">KdlParser</a></li><li><a href="module-kdljs.parser.kql.KqlParser.html">KqlParser</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Thu Sep 16 2021 12:11:55 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sat Apr 23 2022 23:41:28 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>

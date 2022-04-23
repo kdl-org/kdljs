@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parser/base.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parser/base.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @namespace base
+ * @memberof module:kdljs.parser
+ */
+
+const { EmbeddedActionsParser } = require('chevrotain')
+const Tokens = require('./tokens.js')
+
+/**
+ * @type Object&lt;string, string>
+ * @memberof module:kdljs.parser.base
+ */
+const escapes = {
+  '\\n': '\n',
+  '\\r': '\r',
+  '\\t': '\t',
+  '\\\\': '\\',
+  '\\/': '/',
+  '\\"': '"',
+  '\\b': '\x08',
+  '\\f': '\x0C'
+}
+
+/**
+ * @type Object&lt;string, number>
+ * @memberof module:kdljs.parser.base
+ */
+const radix = {
+  b: 2,
+  o: 8,
+  x: 16
+}
+
+/**
+ * @class
+ * @memberof module:kdljs.parser.base
+ */
+class BaseParser extends EmbeddedActionsParser {
+  constructor (tokens) {
+    super(tokens)
+
+    /**
+     * Consume an identifier
+     * @method #identifier
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {string}
+     */
+    this.RULE('identifier', () => {
+      return this.OR([
+        { ALT: () => this.CONSUME(Tokens.Identifier).image },
+        { ALT: () => this.SUBRULE(this.string) },
+        { ALT: () => this.SUBRULE(this.rawString) }
+      ])
+    })
+
+    /**
+     * Consume a tag
+     * @method #tag
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {string}
+     */
+    this.RULE('tag', () => {
+      this.CONSUME(Tokens.LeftParenthesis)
+      const tag = this.SUBRULE(this.identifier)
+      this.CONSUME(Tokens.RightParenthesis)
+      return tag
+    })
+
+    /**
+     * Consume a value
+     * @method #value
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {module:kdljs~Value}
+     */
+    this.RULE('value', () => {
+      return this.OR([
+        { ALT: () => this.SUBRULE(this.string) },
+        { ALT: () => this.CONSUME(Tokens.Boolean).image === 'true' },
+        {
+          ALT: () => {
+            this.CONSUME(Tokens.Null)
+            return null
+          }
+        },
+        {
+          ALT: () => {
+            const number = this.CONSUME(Tokens.Float).image.replace(/_/g, '')
+            return parseFloat(number, 10)
+          }
+        },
+        {
+          ALT: () => {
+            const token = this.CONSUME(Tokens.Integer).image
+            const sign = token.startsWith('-') ? -1 : 1
+            const number = token.replace(/^[+-]?0|_/g, '')
+            return sign * parseInt(number.slice(1), radix[number[0]])
+          }
+        },
+        { ALT: () => this.SUBRULE(this.rawString) }
+      ])
+    })
+
+    /**
+     * Consume a normal string
+     * @method #string
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {string}
+     */
+    this.RULE('string', () => {
+      let string = ''
+
+      this.CONSUME(Tokens.OpenQuote)
+      this.MANY(() => {
+        string += this.OR([
+          { ALT: () => this.CONSUME(Tokens.Unicode).image },
+          { ALT: () => escapes[this.CONSUME(Tokens.Escape).image] },
+          {
+            ALT: () => {
+              const escape = this.CONSUME(Tokens.UnicodeEscape).image.slice(3, -1)
+              return String.fromCharCode(parseInt(escape, 16))
+            }
+          }
+        ])
+      })
+      this.CONSUME(Tokens.CloseQuote)
+
+      return string
+    })
+
+    /**
+     * Consume a raw string
+     * @method #rawString
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {string}
+     */
+    this.RULE('rawString', () => {
+      const string = this.CONSUME(Tokens.RawString).image
+      const start = string.indexOf('"')
+      return string.slice(start + 1, -start)
+    })
+  }
+
+  /**
+   * @method
+   * @param {string} input - Input KDL file (or fragment)
+   * @param {Object} error
+   * @param {string} [message] - Override the error message
+   * @param {Object} [options] - Further configuration
+   * @param {number} [options.context=3] - How many lines before the problematic line to include
+   * @return {string}
+   */
+  formatError (input, error, message = error.message, { context = 3 } = {}) {
+    let output = message + '\n'
+
+    const { startLine, endLine, startColumn, endColumn } = error.token
+    const lines = input.split('\n')
+    output += lines.slice(startLine - Math.min(startLine, context), endLine).join('\n')
+    output += '\n'
+
+    output += ' '.repeat(startColumn - 1) + '^'.repeat(endColumn - startColumn + 1)
+    output += ` at ${startLine}:${startColumn}\n`
+
+    output += error.context.ruleStack
+      .map(rule => '  ' + rule)
+      .join('\n')
+
+    return output
+  }
+}
+
+module.exports.escapes = escapes
+module.exports.radix = radix
+module.exports.BaseParser = BaseParser
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-kdljs.html">kdljs</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-kdljs.formatter.html">formatter</a></li><li><a href="module-kdljs.parser.html">parser</a></li><li><a href="module-kdljs.parser.base.html">base</a></li><li><a href="module-kdljs.parser.kdl.html">kdl</a></li><li><a href="module-kdljs.parser.kql.html">kql</a></li><li><a href="module-kdljs.queryEngine.html">queryEngine</a></li><li><a href="module-kdljs.validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-kdljs.parser.base.BaseParser.html">BaseParser</a></li><li><a href="module-kdljs.parser.kdl.KdlParser.html">KdlParser</a></li><li><a href="module-kdljs.parser.kql.KqlParser.html">KqlParser</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Sat Apr 23 2022 23:41:28 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

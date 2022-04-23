@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: index.js</title>
+    <title>JSDoc: Source: parser/index.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: index.js</h1>
+    <h1 class="page-title">Source: parser/index.js</h1>
 
     
 
@@ -27,54 +27,15 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @module kdljs
+ * @namespace parser
+ * @memberof module:kdljs
  * @borrows module:kdljs.parser.kdl.parse as parse
- * @borrows module:kdljs.formatter.format as format
- * @borrows module:kdljs.queryEngine.query as query
- * @borrows module:kdljs.validator.validateDocument as validateDocument
  */
 
-const { parse } = require('./parser/index.js')
-const { format } = require('./formatter.js')
-const { query } = require('./queryEngine.js')
-const { validateDocument } = require('./validator.js')
+const kdl = require('./kdl')
 
-/**
- * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#document|Document}.
- *
- * @typedef Document
- * @type {Array&lt;module:kdljs~Node>}
- */
-
-/**
- * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#node|Node}.
- *
- * @typedef Node
- * @type {Object}
- * @property {string} name - The name of the Node
- * @property {Array&lt;module:kdljs~Value>} values - Collection of {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#argument|Arguments}
- * @property {Object&lt;string,module:kdljs~Value>} properties - Collection of {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#property|Properties}
- * @property {module:kdljs~Document} children - Nodes in the {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#children-block|Children block}
- */
-
-/**
- * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#value|Value}.
- *
- * @typedef Value
- * @type {(string|number|boolean|null)}
- */
-
-/**
- * A {@link https://github.com/kdl-org/kdl/blob/main/QUERY-SPEC.md|Query string}.
- *
- * @typedef QueryString
- * @type {string}
- */
-
-module.exports.parse = parse
-module.exports.format = format
-module.exports.query = query
-module.exports.validateDocument = validateDocument
+module.exports.parse = kdl.parse
+module.exports.kdl = kdl
 </code></pre>
         </article>
     </section>
