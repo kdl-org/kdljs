@@ -1,3 +1,18 @@
+## [0.1.2](https://github.com/kdl-org/kdljs/compare/v0.1.1...v0.1.2) (2022-04-23)
+
+
+### Bug Fixes
+
+* fix require stack ([c94f5c8](https://github.com/kdl-org/kdljs/commit/c94f5c8b648f8e2971d1c54b532abb9c32bef0a5))
+* **parser:** correct BOM from U+FFEF to U+FEFF ([f07927e](https://github.com/kdl-org/kdljs/commit/f07927ee5b969ed02b02e76fc3c732400be2b2aa))
+
+
+### Features
+
+* **queryEngine:** support queries ([ec79f78](https://github.com/kdl-org/kdljs/commit/ec79f789211df5d25e87b15671c390baae6e928a))
+
+
+
 ## [0.1.1](https://github.com/kdl-org/kdljs/compare/v0.1.0...v0.1.1) (2021-09-16)
 
 
