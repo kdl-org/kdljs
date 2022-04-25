@@ -154,7 +154,7 @@ function formatNode (node, options, indent) {
 
   const currentIndent = options.indentChar.repeat(options.indent * indent)
   const parts = [
-    currentIndent + formatTag(node.tags.name) + formatIdentifier(node.name, options),
+    currentIndent + formatTag(node.tags.name, options) + formatIdentifier(node.name, options),
     ...values.map((value, index) => formatValue(value, node.tags.values[index], options)),
     ...properties.map(key => formatProperty(key, node.properties[key], node.tags.properties[key], options))
   ]
