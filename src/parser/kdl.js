@@ -57,6 +57,18 @@ class KdlParser extends BaseParser {
 
     /**
      * Consume a KDL document
+     * @method #document
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     * @return {module:kdljs~Document}
+     */
+    this.RULE('document', () => {
+      const nodes = this.SUBRULE(this.nodes)
+      this.CONSUME(Tokens.EOF)
+      return nodes
+    })
+
+    /**
+     * Consume a sequence of KDL nodes
      * @method #nodes
      * @memberof module:kdljs.parser.kdl.KdlParser
      * @return {module:kdljs~Document}
@@ -77,8 +89,6 @@ class KdlParser extends BaseParser {
         { ALT: () => this.CONSUME(Tokens.NewLine) },
         { ALT: () => nodes.push(this.SUBRULE1(this.node)) }
       ]))
-
-      this.CONSUME(Tokens.EOF)
 
       return nodes
     })
@@ -321,7 +331,7 @@ const parser = new KdlParser()
  */
 module.exports.parse = function parse (text) {
   parser.input = lexer.tokenize(text).tokens
-  const output = parser.nodes()
+  const output = parser.document()
 
   return {
     output,
