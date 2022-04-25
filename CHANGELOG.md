@@ -1,3 +1,22 @@
+## [0.1.3](https://github.com/kdl-org/kdljs/compare/v0.1.2...v0.1.3) (2022-04-25)
+
+
+### Bug Fixes
+
+* **formatter:** fix node tag escapes ([7ab1bef](https://github.com/kdl-org/kdljs/commit/7ab1bef99bee4a46ffaafa20520d0bf1eab5d416))
+* **parser:** fix 6e59505 ([93856e5](https://github.com/kdl-org/kdljs/commit/93856e5a492026607f982ed915ba0c0729bb9f44))
+* **parser:** force to parse until EOF ([6e59505](https://github.com/kdl-org/kdljs/commit/6e595058455964ed05b7461be1f05713c6e352c7))
+* **parser:** handle boolean/null prefix in identifier ([a274ade](https://github.com/kdl-org/kdljs/commit/a274ade96700ab42571b9c6532b0aba86c89a1cc)), closes [#12](https://github.com/kdl-org/kdljs/issues/12)
+* **parser:** handle lexer errors ([ec672d4](https://github.com/kdl-org/kdljs/commit/ec672d49f4cde017339bf5bffc2205f675aff05c)), closes [#11](https://github.com/kdl-org/kdljs/issues/11) [#10](https://github.com/kdl-org/kdljs/issues/10)
+* **parser:** limit unicode escapes ([1981017](https://github.com/kdl-org/kdljs/commit/19810172052fe17535a4d23f300d461e7a054797)), closes [#10](https://github.com/kdl-org/kdljs/issues/10)
+
+
+### Features
+
+* fully support type annotations ([63a008f](https://github.com/kdl-org/kdljs/commit/63a008f06b3890fe473448e987de0037ccde8f18))
+
+
+
 ## [0.1.2](https://github.com/kdl-org/kdljs/compare/v0.1.1...v0.1.2) (2022-04-23)
 
 
