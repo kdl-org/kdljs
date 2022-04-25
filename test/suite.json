@@ -43,10 +43,10 @@
     { "name": "node", "values": [null] }
   ],
   "tag_node": [
-    { "name": "node" }
+    { "name": "node", "tags": { "name": "tag" } }
   ],
   "tag_value": [
-    { "name": "node", "values": ["value"] },
-    { "name": "node", "properties": { "key": "value" } }
+    { "name": "node", "values": ["value"], "tags": { "values": ["tag"] } },
+    { "name": "node", "properties": { "key": "value" }, "tags": { "properties": { "key": "tag" } } }
   ]
 }

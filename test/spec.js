@@ -17,7 +17,13 @@ function prepareExpectations (output) {
     values: [],
     properties: {},
     children: [],
-    ...node
+    ...node,
+    tags: {
+      name: undefined,
+      values: [],
+      properties: {},
+      ...(node.tags || {})
+    }
   }))
 }
 
