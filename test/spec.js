@@ -6,11 +6,6 @@ const fs = require('fs')
 const suite = require('./suite.json')
 const { parse, format } = require('../')
 
-function getInput (name) {
-  const fileName = path.join(__dirname, './kdl', name + '.kdl')
-  return fs.readFileSync(fileName, 'utf8')
-}
-
 function prepareExpectations (output) {
   return output.map(node => ({
     name: 'node',
@@ -27,18 +22,32 @@ function prepareExpectations (output) {
   }))
 }
 
-describe('parses', function () {
-  for (const thing in suite) {
-    const input = getInput(thing)
-    it(thing, function () {
-      const actual = parse(input)
+const customTests = path.join(__dirname, './kdl')
+const customTestFile = fs.readdirSync(customTests)
 
-      if (actual.errors.length) {
-        throw actual.errors[0]
+describe('Custom tests', function () {
+  for (const test of customTestFile) {
+    const name = test.slice(0, -4)
+    const input = fs.readFileSync(path.join(customTests, test), 'utf8')
+
+    describe(name, function () {
+      if (name in suite) {
+        it('parses', function () {
+          const actual = parse(input)
+
+          if (actual.errors.length) {
+            throw actual.errors[0]
+          }
+
+          const expected = prepareExpectations(suite[name])
+          assert.deepStrictEqual(actual.output, expected)
+        })
+      } else {
+        it('fails to parse', function () {
+          const actual = parse(input)
+          assert.strictEqual(actual.output, undefined)
+        })
       }
-
-      const expected = prepareExpectations(suite[thing])
-      assert.deepStrictEqual(actual.output, expected)
     })
   }
 })
