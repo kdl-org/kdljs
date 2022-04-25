@@ -94,17 +94,29 @@ function formatIdentifier (value, options) {
 /**
  * @access private
  * @memberof module:kdljs.formatter
- * @param {module:kdljs~Value} value - KDL value
+ * @param {string} [value] - KDL tag
  * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
-function formatValue (value, options) {
+function formatTag (value, options) {
+  return value === undefined ? '' : '(' + formatIdentifier(value, options) + ')'
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {module:kdljs~Value} value - KDL value
+ * @param {string} [tag] - KDL tag
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @return {string}
+ */
+function formatValue (value, tag, options) {
   if (typeof value === 'string') {
-    return formatString(value, options)
+    return formatTag(tag, options) + formatString(value, options)
   } else if (typeof value === 'number' && options.exponentChar === 'E') {
-    return value.toString().toUpperCase()
+    return formatTag(tag, options) + value.toString().toUpperCase()
   } else {
-    return value + ''
+    return formatTag(tag, options) + value
   }
 }
 
@@ -113,11 +125,12 @@ function formatValue (value, options) {
  * @memberof module:kdljs.formatter
  * @param {string} key
  * @param {module:kdljs~Value} value - KDL value
+ * @param {string} [tag] - KDL tag
  * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
  * @return {string}
  */
-function formatProperty (key, value, options) {
-  return formatIdentifier(key, options) + '=' + formatValue(value, options)
+function formatProperty (key, value, tag, options) {
+  return formatIdentifier(key, options) + '=' + formatValue(value, tag, options)
 }
 
 /**
@@ -141,9 +154,9 @@ function formatNode (node, options, indent) {
 
   const currentIndent = options.indentChar.repeat(options.indent * indent)
   const parts = [
-    currentIndent + formatIdentifier(node.name, options),
-    ...values.map(value => formatValue(value, options)),
-    ...properties.map(key => formatProperty(key, node.properties[key], options))
+    currentIndent + formatTag(node.tags.name) + formatIdentifier(node.name, options),
+    ...values.map((value, index) => formatValue(value, node.tags.values[index], options)),
+    ...properties.map(key => formatProperty(key, node.properties[key], node.tags.properties[key], options))
   ]
 
   if (node.children.length) {

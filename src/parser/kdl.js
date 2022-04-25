@@ -88,7 +88,11 @@ class KdlParser extends BaseParser {
      * @return {module:kdljs~Node}
      */
     this.RULE('node', () => {
-      this.OPTION1(() => this.SUBRULE(this.tag))
+      const tags = {
+        name: this.OPTION1(() => this.SUBRULE(this.tag)),
+        properties: {},
+        values: []
+      }
       const name = this.SUBRULE(this.identifier)
       const properties = {}
       const values = []
@@ -103,13 +107,22 @@ class KdlParser extends BaseParser {
           {
             GATE: this.BACKTRACK(this.property),
             ALT: () => {
-              const pair = this.SUBRULE(this.property)
-              properties[pair[0]] = pair[1]
+              const parts = this.SUBRULE(this.property)
+              properties[parts[0]] = parts[1]
+              if (parts[2] !== undefined) {
+                tags.properties[parts[0]] = parts[2]
+              }
             }
           },
           {
             GATE: this.BACKTRACK(this.taggedValue),
-            ALT: () => values.push(this.SUBRULE(this.taggedValue))
+            ALT: () => {
+              const parts = this.SUBRULE(this.taggedValue)
+              values.push(parts[0])
+              if (parts[1] !== undefined) {
+                tags.values.push(parts[1])
+              }
+            }
           },
           {
             ALT: () => {
@@ -161,7 +174,7 @@ class KdlParser extends BaseParser {
         }
       ])
 
-      return { name, properties, values, children }
+      return { name, properties, values, children, tags }
     })
 
     /**
@@ -173,8 +186,8 @@ class KdlParser extends BaseParser {
     this.RULE('property', () => {
       const key = this.SUBRULE(this.identifier)
       this.CONSUME(Tokens.Equals)
-      const value = this.SUBRULE(this.taggedValue)
-      return [key, value]
+      const parts = this.SUBRULE(this.taggedValue)
+      return [key, parts[0], parts[1]]
     })
 
     /**
@@ -184,8 +197,9 @@ class KdlParser extends BaseParser {
      * @return {module:kdljs~Value}
      */
     this.RULE('taggedValue', () => {
-      this.OPTION(() => this.SUBRULE(this.tag))
-      return this.SUBRULE(this.value)
+      const tag = this.OPTION(() => this.SUBRULE(this.tag))
+      const value = this.SUBRULE(this.value)
+      return [value, tag]
     })
 
     /**
