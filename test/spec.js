@@ -43,45 +43,10 @@ describe('parses', function () {
   }
 })
 
-const KDL4J_BROKEN_TESTS = new Set([
-  // Unclear? If the escline was on the previous line it would continue
-  // node1 but then the schema would require a node separator before node2,
-  // as the newline of the escline itself does not count. If the escline is
-  // on its own line (as it is now) it is not an escline, but syntax unknown
-  // to me.
-  'escline_comment_node.kdl',
-
-  // This is supposed to fail but the syntax is supported now
-  'underscore_in_fraction.kdl'
-])
-
 const KDL4J_BROKEN_OUTPUT_TESTS = new Set([
-  // Different integer formats
-  'arg_hex_type.kdl',
-  'binary.kdl',
-  'binary_trailing_underscore.kdl',
-  'binary_underscore.kdl',
-  'leading_zero_oct.kdl',
-  'octal.kdl',
-  'prop_hex_type.kdl',
-  'trailing_underscore_hex.kdl',
-  'trailing_underscore_octal.kdl',
-  'underscore_in_octal.kdl',
-
-  // kdljs does not distinguish between empty child blocks and a
-  // missing child block
-  'empty_child.kdl',
-  'empty_child_different_lines.kdl',
-  'empty_child_same_line.kdl',
-  'empty_child_whitespace.kdl',
-  'slashdash_node_in_child.kdl',
-
   // Different float formats
   'hex.kdl',
   'hex_int.kdl',
-  'hex_int_underscores.kdl',
-  'hex_leading_zero.kdl',
-  'leading_zero_binary.kdl',
   'negative_exponent.kdl',
   'negative_float.kdl',
   'no_decimal_exponent.kdl',
@@ -117,14 +82,12 @@ const KDL4J_OPTIONS = {
   printNullProps: true
 }
 
-const KDL4J_PATH = path.join(__dirname, 'kdl4j', 'src', 'test', 'resources', 'test_cases')
+const KDL4J_PATH = path.join(__dirname, 'kdl-official', 'tests', 'test_cases')
 const KDL4J_INPUT_PATH = path.join(KDL4J_PATH, 'input')
 const kdl4jInput = fs.readdirSync(KDL4J_INPUT_PATH)
 
-describe('kdl4j', function () {
+describe('Official test suite', function () {
   for (const file of kdl4jInput) {
-    if (KDL4J_BROKEN_TESTS.has(file)) continue
-
     describe(file, function () {
       const input = fs.readFileSync(path.join(KDL4J_INPUT_PATH, file), 'utf8')
       const expectedPath = path.join(KDL4J_PATH, 'expected_kdl', file)
