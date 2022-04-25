@@ -35,6 +35,7 @@ const { validateDocument } = require('./validator.js')
  * @property {module:kdljs.queryEngine.Accessor} [accessor]
  * @property {string} [operator]
  * @property {module:kdljs~Value} [value] - comparison value
+ * @property {module:kdljs~string} [tag] - comparison tag
  */
 
 /**
@@ -62,10 +63,6 @@ function applyAccessor (accessor, node) {
   switch (accessor.type) {
     case 'name':
       return node.name
-
-    case 'tag':
-      // TODO tag support
-      return undefined
 
     case 'prop':
       return node.properties[accessor.parameter]
@@ -130,6 +127,14 @@ function applyMatcher (matcher, node) {
     return false
   }
 
+  if (matcher.tag) {
+    if (matcher.operator !== '=') {
+      throw new TypeError('Matcher of type annotations only allow simple comparisons')
+    }
+
+    return matcher.tag === applyAccessor(matcher.accessor, node.tags)
+  }
+
   const value = applyAccessor(matcher.accessor, node)
 
   if (!matcher.operator) {
@@ -138,9 +143,6 @@ function applyMatcher (matcher, node) {
     throw new TypeError('Matcher with comparison operator requires comparison value, none given')
   } else if (typeof value !== typeof matcher.value) {
     throw new TypeError(`Matcher does not support coercion, ${typeof value} and ${typeof matcher.value} cannot be compared`)
-  } else if (typeof matcher.value === 'object' && matcher.tag) {
-    // TODO tag support
-    return false
   }
 
   checkOperand(matcher.value, matcher.operator)

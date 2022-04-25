@@ -169,9 +169,9 @@ class KqlParser extends BaseParser {
         },
         {
           ALT: () => ({
-            accessor: { type: 'tag' },
+            accessor: { type: 'name' },
             operator: '=',
-            value: this.SUBRULE(this.tag)
+            tag: this.SUBRULE(this.tag)
           })
         },
         { ALT: () => this.SUBRULE(this.accessorMatcher) }
@@ -193,12 +193,14 @@ class KqlParser extends BaseParser {
           const operator = this.SUBRULE(this.matcherOperator)
           this.CONSUME1(Tokens.WhiteSpace)
 
-          const value = this.OR([
-            { ALT: () => this.SUBRULE(this.value) },
-            { ALT: () => ({ tag: this.SUBRULE(this.tag) }) }
+          const matcher = { accessor, operator }
+
+          this.OR([
+            { ALT: () => { matcher.value = this.SUBRULE(this.value) } },
+            { ALT: () => { matcher.tag = this.SUBRULE(this.tag) } }
           ])
 
-          return { accessor, operator, value }
+          return matcher
         })
 
         return matcher || { accessor }
