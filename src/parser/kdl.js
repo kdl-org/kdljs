@@ -78,6 +78,8 @@ class KdlParser extends BaseParser {
         { ALT: () => nodes.push(this.SUBRULE1(this.node)) }
       ]))
 
+      this.CONSUME(Tokens.EOF)
+
       return nodes
     })
 
