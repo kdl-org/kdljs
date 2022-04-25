@@ -68,6 +68,7 @@ const RightBrace = createToken({ name: 'RightBrace', pattern: /\}/ })
 const LeftParenthesis = createToken({ name: 'LeftParenthesis', pattern: /\(/ })
 const RightParenthesis = createToken({ name: 'RightParenthesis', pattern: /\)/ })
 const EscLine = createToken({ name: 'EscLine', pattern: /\\/ })
+const Unknown = createToken({ name: 'Unknown', pattern: /[^]/ })
 
 // String
 const OpenQuote = createToken({ name: 'OpenQuote', pattern: /"/, push_mode: 'string' })
@@ -148,5 +149,6 @@ module.exports = {
   Accessor,
   Comma,
 
+  Unknown,
   EOF
 }

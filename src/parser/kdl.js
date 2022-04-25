@@ -3,7 +3,7 @@
  * @memberof module:kdljs.parser
  */
 
-const { Lexer } = require('chevrotain')
+const { Lexer, MismatchedTokenException, createTokenInstance } = require('chevrotain')
 const { BaseParser } = require('./base.js')
 const Tokens = require('./tokens.js')
 
@@ -308,6 +308,41 @@ class KdlParser extends BaseParser {
   }
 }
 
+/**
+ * @access private
+ * @memberof module:kdljs.parser.kdl
+ * @param {Object} error
+ * @param {string} error.message
+ * @param {number} error.offset
+ * @param {number} error.length
+ * @param {number} error.line
+ * @param {number} error.column
+ * @param {Object[]} tokens
+ * @param {string} text
+ * @return {Object}
+ */
+function transformLexerError (error, tokens, text) {
+  const endOffset = error.offset + error.length
+  const image = text.slice(error.offset, endOffset)
+  const lines = image.split(/\r?\n/g)
+  const prevToken = tokens.find(token => token.endOffset + 1 === error.offset)
+
+  return new MismatchedTokenException(
+    error.message,
+    createTokenInstance(
+      Tokens.Unknown,
+      image,
+      error.offset,
+      endOffset,
+      error.line,
+      error.line + lines.length - 1,
+      error.column,
+      error.column + lines[lines.length - 1].length
+    ),
+    prevToken
+  )
+}
+
 const lexer = new Lexer(tokens)
 /**
  * @constant {module:kdljs.parser.kdl.KdlParser}
@@ -330,7 +365,16 @@ const parser = new KdlParser()
  * @return {module:kdljs.parser.kdl.ParseResult} Output
  */
 module.exports.parse = function parse (text) {
-  parser.input = lexer.tokenize(text).tokens
+  const { tokens, errors } = lexer.tokenize(text)
+
+  if (errors.length) {
+    return {
+      output: undefined,
+      errors: errors.map(error => transformLexerError(error, tokens, text))
+    }
+  }
+
+  parser.input = tokens
   const output = parser.document()
 
   return {
