@@ -1,3 +1,12 @@
+## [0.1.4](https://github.com/kdl-org/kdljs/compare/v0.1.3...v0.1.4) (2022-04-25)
+
+
+### Features
+
+* **queryEngine:** support tags ([832ccb4](https://github.com/kdl-org/kdljs/commit/832ccb4556e65c1b16598ef25aaad09aeb05a081))
+
+
+
 ## [0.1.3](https://github.com/kdl-org/kdljs/compare/v0.1.2...v0.1.3) (2022-04-25)
 
 
