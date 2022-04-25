@@ -51,25 +51,19 @@ const KDL4J_BROKEN_TESTS = new Set([
   // to me.
   'escline_comment_node.kdl',
 
-  // Only whitespace is supported between /- and the thing it is
-  // commenting out
-  'slashdash_arg_before_newline_esc.kdl',
-
   // This is supposed to fail but the syntax is supported now
-  'underscore_in_fraction.kdl',
-
-  // This was supported but is no longer
-  'unusual_chars_in_bare_id.kdl',
-  'unusual_bare_id_chars_in_quoted_id.kdl'
+  'underscore_in_fraction.kdl'
 ])
 
 const KDL4J_BROKEN_OUTPUT_TESTS = new Set([
   // Different integer formats
+  'arg_hex_type.kdl',
   'binary.kdl',
   'binary_trailing_underscore.kdl',
   'binary_underscore.kdl',
   'leading_zero_oct.kdl',
   'octal.kdl',
+  'prop_hex_type.kdl',
   'trailing_underscore_hex.kdl',
   'trailing_underscore_octal.kdl',
   'underscore_in_octal.kdl',
@@ -93,6 +87,7 @@ const KDL4J_BROKEN_OUTPUT_TESTS = new Set([
   'no_decimal_exponent.kdl',
   'numeric_prop.kdl',
   'positive_exponent.kdl',
+  'prop_float_type.kdl',
   'slashdash_negative_number.kdl',
   'underscore_in_exponent.kdl',
   'underscore_in_float.kdl',
@@ -111,7 +106,7 @@ const KDL4J_OPTIONS = {
   requireSemicolons: false,
   escapeNonAscii: false,
   escapeNonPrintableAscii: true,
-  escapeCommon: true,
+  escapeCommon: false,
   escapeLinespace: true,
   newline: '\n',
   indent: 4,
