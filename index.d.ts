@@ -18,12 +18,26 @@ declare namespace kdljs {
     properties: Record<string, Value>;
     /** Nodes in the {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#children-block|Children block} */
     children: Document;
+    /** Collection of {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#type-annotation|type annotations} */
+    tags: NodeTypeAnnotations;
   }
 
   /**
    * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#value|Value}.
    */
   export type Value = string | number | boolean | null;
+
+  /**
+   * The {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#type-annotation|Type annotations} associated with a {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#node|Node}.
+   */
+  export interface NodeTypeAnnotations {
+    /** The type annotation of the Node */
+    name: string;
+    /** The type annotations of the {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#argument|Arguments} */
+    values: string[];
+    /** The type annotations of the {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#property|Properties} */
+    properties: Record<string, string>;
+  }
 
   /**
    * A {@link https://github.com/kdl-org/kdl/blob/main/QUERY-SPEC.md|Query string}.
