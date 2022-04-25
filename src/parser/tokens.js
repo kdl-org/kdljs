@@ -40,8 +40,12 @@ const CloseMultiLineComment = createToken({
 })
 
 // Values
-const Boolean = createToken({ name: 'Boolean', pattern: /true|false/ })
-const Null = createToken({ name: 'Null', pattern: /null/ })
+const Identifier = createToken({
+  name: 'Identifier',
+  pattern: /(?![+-]\d)[\x21\x23-\x27\x2A\x2B\x2D\x2E\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*/
+})
+const Boolean = createToken({ name: 'Boolean', pattern: /true|false/, longer_alt: Identifier })
+const Null = createToken({ name: 'Null', pattern: /null/, longer_alt: Identifier })
 const RawString = createToken({
   name: 'RawString',
   pattern: /r(#*)"[^]*?"\1/,
@@ -57,10 +61,6 @@ const Integer = createToken({
 })
 
 // Other
-const Identifier = createToken({
-  name: 'Identifier',
-  pattern: /(?![+-]\d)[\x21\x23-\x27\x2A\x2B\x2D\x2E\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*/
-})
 const SemiColon = createToken({ name: 'SemiColon', pattern: /;/ })
 const Equals = createToken({ name: 'Equals', pattern: /=/ })
 const LeftBrace = createToken({ name: 'LeftBrace', pattern: /\{/ })
