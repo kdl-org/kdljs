@@ -15,7 +15,7 @@ function prepareExpectations (output) {
     ...node,
     tags: {
       name: undefined,
-      values: [],
+      values: Array(node.values ? node.values.length : 0).fill(undefined),
       properties: {},
       ...(node.tags || {})
     }
