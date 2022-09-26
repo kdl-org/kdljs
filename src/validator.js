@@ -45,6 +45,33 @@ function validateNode (node) {
     return false
   }
 
+  if (!Object.prototype.hasOwnProperty.call(node, 'tags') ||
+      !validateTags(node.tags)) {
+    return false
+  }
+
+  return true
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.validator
+ * @param {module:kdljs~NodeTypeAnnotations} tags - KDL node type annotations
+ * @return {boolean}
+ */
+function validateTags (tags) {
+  if (typeof tags !== 'object') {
+    return false
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(tags, 'values') || !Array.isArray(tags.values)) {
+    return false
+  }
+
+  if (!Object.prototype.hasOwnProperty.call(tags, 'properties') || typeof tags.properties !== 'object') {
+    return false
+  }
+
   return true
 }
 
