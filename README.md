@@ -171,7 +171,7 @@ package {
 ```js
 const { parse, query } = require('kdljs')
 
-const document = parse(`package {
+const { output: document } = parse(`package {
     name "foo"
     version "1.0.0"
     dependencies platform="windows" {
