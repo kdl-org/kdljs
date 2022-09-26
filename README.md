@@ -166,6 +166,91 @@ package {
 `)
 ```
 
+### Querying
+
+```js
+const { parse, query } = require('kdljs')
+
+const document = parse(`package {
+    name "foo"
+    version "1.0.0"
+    dependencies platform="windows" {
+        winapi "1.0.0" path="./crates/my-winapi-fork"
+    }
+    dependencies {
+        miette "2.0.0" dev=true
+    }
+}`)
+
+query(document, 'package name') // or
+query(document, 'top() > package name')
+
+// [
+//   {
+//     name: 'name',
+//     values: ['foo'],
+//     ...
+//   }
+// ]
+
+query(document, 'dependencies')
+
+// [
+//   {
+//     name: 'dependencies',
+//     properties: { platform: 'windows' },
+//     ...
+//   },
+//   {
+//     name: 'dependencies',
+//     ...
+//   }
+// ]
+
+query(document, 'dependencies[platform]') // or
+query(document, 'dependencies[prop(platform)]')
+
+// [
+//   {
+//     name: 'dependencies',
+//     properties: { platform: 'windows' },
+//     ...
+//   }
+// ]
+
+query(document, 'dependencies > []')
+
+// [
+//   {
+//     name: 'winapi',
+//     properties: { path: './crates/my-winapi-fork' },
+//     values: [ '1.0.0' ],
+//     ...
+//   },
+//   {
+//     name: 'miette',
+//     properties: { dev: 'true' },
+//     values: [ '2.0.0' ],
+//     ...
+//   }
+// ]
+
+// MAP OPERATOR
+// ============
+
+query(document, 'package name => val()')
+// ['foo'].
+
+query(document, 'dependencies[platform] => platform')
+// ['windows']
+
+query(document, 'dependencies > [] => (name(), val(), path)')
+// [('winapi', '1.0.0', './crates/my-winapi-fork'), ('miette', '2.0.0', None)]
+
+query(document, 'dependencies > [] => (name(), values(), props())')
+// [('winapi', ['1.0.0'], {'platform': 'windows'}), ('miette', ['2.0.0'], {'dev': true})]
+```
+
 ### Formatting
 
 ```js
