@@ -1,3 +1,13 @@
+## [0.1.5](https://github.com/kdl-org/kdljs/compare/v0.1.4...v0.1.5) (2022-09-26)
+
+
+### Bug Fixes
+
+* **parser:** align type annotations with values ([a6c8694](https://github.com/kdl-org/kdljs/commit/a6c8694950e30dbff1bc14496f2803546693a47e))
+* **validator:** validate node type annotations ([1cb05ad](https://github.com/kdl-org/kdljs/commit/1cb05ad2920e0165d99ce35bb697dc75d286cd07))
+
+
+
 ## [0.1.4](https://github.com/kdl-org/kdljs/compare/v0.1.3...v0.1.4) (2022-04-25)
 
 
