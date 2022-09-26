@@ -121,9 +121,7 @@ class KdlParser extends BaseParser {
             ALT: () => {
               const parts = this.SUBRULE(this.property)
               properties[parts[0]] = parts[1]
-              if (parts[2] !== undefined) {
-                tags.properties[parts[0]] = parts[2]
-              }
+              tags.properties[parts[0]] = parts[2]
             }
           },
           {
@@ -131,9 +129,7 @@ class KdlParser extends BaseParser {
             ALT: () => {
               const parts = this.SUBRULE(this.taggedValue)
               values.push(parts[0])
-              if (parts[1] !== undefined) {
-                tags.values.push(parts[1])
-              }
+              tags.values.push(parts[1])
             }
           },
           {
