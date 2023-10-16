@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: queryEngine.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: queryEngine.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @namespace queryEngine
+ * @memberof module:kdljs
+ */
+
+const { parse } = require('./parser/kql.js')
+const { validateDocument } = require('./validator.js')
+
+/**
+ * @typedef Query
+ * @memberof module:kdljs.queryEngine
+ * @type {Object}
+ * @property {Array&lt;module:kdljs.queryEngine.Selector>} alternatives - Alternative selectors
+ * @property {module:kdljs.queryEngine.Mapping} [mapping] - Mapping tuple
+ */
+
+/**
+ * @typedef Selector
+ * @memberof module:kdljs.queryEngine
+ * @type {Array&lt;module:kdljs.queryEngine.NodeFilter>}
+ */
+
+/**
+ * @typedef NodeFilter
+ * @memberof module:kdljs.queryEngine
+ * @type {Object}
+ * @property {Array&lt;module:kdljs.queryEngine.Matcher>} matchers
+ * @property {string} [operator]
+ */
+
+/**
+ * @typedef Matcher
+ * @memberof module:kdljs.queryEngine
+ * @type {Object}
+ * @property {module:kdljs.queryEngine.Accessor} [accessor]
+ * @property {string} [operator]
+ * @property {module:kdljs~Value} [value] - comparison value
+ * @property {module:kdljs~string} [tag] - comparison tag
+ */
+
+/**
+ * @typedef Accessor
+ * @memberof module:kdljs.queryEngine
+ * @type {Object}
+ * @property {string} type
+ * @property {string|number} [parameter]
+ */
+
+/**
+ * @typedef Mapping
+ * @memberof module:kdljs.queryEngine
+ * @type {module:kdljs.queryEngine.Accessor|Array&lt;module:kdljs.queryEngine.Accessor>}
+ */
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @param {module:kdljs.queryEngine.Accessor} accessor
+ * @param {module:kdljs~Node} node
+ * @return {string|module:kdljs~Value|Array&lt;module:kdljs~Value>|Object&lt;string,module:kdljs~Value>|undefined} result
+ */
+function applyAccessor (accessor, node) {
+  switch (accessor.type) {
+    case 'name':
+      return node.name
+
+    case 'prop':
+      return node.properties[accessor.parameter]
+
+    case 'val':
+      if (accessor.parameter &amp;&amp; typeof accessor.parameter !== 'number') {
+        throw TypeError(`Value accessor requires numeric parameter, ${typeof accessor.parameter} given`)
+      }
+      return node.values[accessor.parameter || 0]
+
+    case 'props':
+      return node.properties
+
+    case 'values':
+      return node.values
+  }
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @constant {Object&lt;string,string|null>} operandTypes
+ */
+const operandTypes = {
+  '=': null,
+  '!=': null,
+
+  '>': 'number',
+  '&lt;': 'number',
+  '>=': 'number',
+  '&lt;=': 'number',
+
+  '^=': 'string',
+  '$=': 'string',
+  '*=': 'string'
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @param {undefined|module:kdljs~Value} value
+ * @param {string} operator
+ * @throw {TypeError}
+ */
+function checkOperand (value, operator) {
+  const type = operandTypes[operator]
+  if (type &amp;&amp; typeof value !== type) { // eslint-disable-line valid-typeof
+    throw new TypeError(`Matcher with '${operator}' operator requires a ${type} value, ${typeof value} given`)
+  }
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @param {module:kdljs.queryEngine.Matcher} matcher
+ * @param {module:kdljs~Node} node
+ * @return boolean
+ */
+function applyMatcher (matcher, node) {
+  if (!matcher.accessor) { return true }
+  if (matcher.accessor.type === 'props' || matcher.accessor.type === 'values') {
+    return false
+  }
+
+  if (matcher.tag) {
+    if (matcher.operator !== '=') {
+      throw new TypeError('Matcher of type annotations only allow simple comparisons')
+    }
+
+    return matcher.tag === applyAccessor(matcher.accessor, node.tags)
+  }
+
+  const value = applyAccessor(matcher.accessor, node)
+
+  if (!matcher.operator) {
+    return value != null
+  } else if (!matcher.value) {
+    throw new TypeError('Matcher with comparison operator requires comparison value, none given')
+  } else if (typeof value !== typeof matcher.value) {
+    throw new TypeError(`Matcher does not support coercion, ${typeof value} and ${typeof matcher.value} cannot be compared`)
+  }
+
+  checkOperand(matcher.value, matcher.operator)
+
+  switch (matcher.operator) {
+    case '=': return value === matcher.value
+    case '!=': return value !== matcher.value
+
+    // Number only
+    case '>': return value > matcher.value
+    case '&lt;': return value &lt; matcher.value
+    case '>=': return value >= matcher.value
+    case '&lt;=': return value &lt;= matcher.value
+
+    // String only
+    case '^=': return value.startsWith(matcher.value)
+    case '$=': return value.endsWith(matcher.value)
+    case '*=': return value.includes(matcher.value)
+
+    default: return false
+  }
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @param {module:kdljs.queryEngine.NodeFilter} nodeFilter
+ * @param {module:kdljs~Node} node
+ * @return boolean
+ */
+function applyNodeFilter (nodeFilter, node) {
+  return nodeFilter.matchers.every(matcher => applyMatcher(matcher, node))
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @param {Array&lt;module:kdljs~Node>} nodes
+ * @param {boolean} includeSelf
+ * @return {Array&lt;module:kdljs~Node>}
+ */
+function collectChildren (nodes, includeSelf) {
+  const children = nodes.flatMap(node => collectChildren(node.children, true))
+  return includeSelf ? nodes.concat(children) : children
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @param {Array&lt;module:kdljs~Node>} nodes
+ * @return {Array&lt;module:kdljs~Node>}
+ */
+function collectImmediateChildren (nodes) {
+  return nodes.flatMap(node => node.children)
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @param {Array} array
+ * @return {Array}
+ */
+function unique (array) {
+  return array.filter((value, index) => array.indexOf(value) === index)
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @param {module:kdljs.queryEngine.Selector} selector
+ * @param {module:kdljs~Document} doc
+ * @return {Array&lt;module:kdljs~Node>}
+ */
+function applySelector (selector, doc) {
+  if (selector[0] &amp;&amp; selector[0].matchers[0].accessor &amp;&amp; selector[0].matchers[0].accessor.type === 'top') {
+    selector = selector.slice(1)
+  }
+
+  let nodes = [{ children: doc }]
+
+  for (const nodeFilter of selector) {
+    switch (nodeFilter.operator) {
+      case '+':
+      case '~':
+        throw new TypeError('Sibling selectors not supported yet.')
+
+      case '>':
+        nodes = collectImmediateChildren(nodes)
+        break
+
+      case undefined:
+      default:
+        nodes = collectChildren(nodes)
+        break
+    }
+
+    nodes = unique(nodes).filter(node => applyNodeFilter(nodeFilter, node))
+  }
+
+  return nodes
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @param {module:kdljs.queryEngine.Mapping} mapping
+ * @param {Array&lt;module:kdljs~Node>} nodes
+ * @return {any}
+ */
+function applyMapping (mapping, nodes) {
+  return nodes.map(node => {
+    if (Array.isArray(mapping)) {
+      return mapping.map(accessor => applyAccessor(accessor, node))
+    } else {
+      return applyAccessor(mapping, node)
+    }
+  })
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.queryEngine
+ * @param {module:kdljs.queryEngine.Query} query
+ * @param {module:kdljs~Document} doc
+ * @return {any}
+ */
+function applyQuery (query, doc) {
+  const nodes = unique(query.alternatives.flatMap(selector => applySelector(selector, doc)))
+
+  if (query.mapping) {
+    return applyMapping(query.mapping, nodes)
+  } else {
+    return nodes
+  }
+}
+
+/**
+ * @memberof module:kdljs.queryEngine
+ * @param {module:kdljs~Document} doc - Input KDL document
+ * @param {module:kdljs~QueryString} queryString - Query for selecting and/or transforming results
+ * @return {any}
+ */
+function query (doc, queryString) {
+  if (!validateDocument(doc)) {
+    throw new TypeError('Invalid KDL document')
+  }
+
+  const { output, errors } = parse(queryString)
+  if (errors &amp;&amp; errors.length) {
+    throw errors[0]
+  }
+
+  return applyQuery(output, doc)
+}
+
+module.exports.query = query
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-kdljs.html">kdljs</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-kdljs.formatter.html">formatter</a></li><li><a href="module-kdljs.parser.html">parser</a></li><li><a href="module-kdljs.parser.base.html">base</a></li><li><a href="module-kdljs.parser.kdl.html">kdl</a></li><li><a href="module-kdljs.parser.kql.html">kql</a></li><li><a href="module-kdljs.queryEngine.html">queryEngine</a></li><li><a href="module-kdljs.validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-kdljs.parser.base.BaseParser.html">BaseParser</a></li><li><a href="module-kdljs.parser.kdl.KdlParser.html">KdlParser</a></li><li><a href="module-kdljs.parser.kql.KqlParser.html">KqlParser</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 16 2023 12:26:16 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

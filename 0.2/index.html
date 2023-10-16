@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1 id="kdl-js">KDL-JS</h1>
+<p>A JavaScript library for the <a href="https://github.com/kdl-org/kdl">KDL Document Language</a>.</p>
+<h2 id="install">Install</h2>
+<pre><code>npm install kdljs
+</code></pre>
+<h2 id="usage">Usage</h2>
+<h3 id="parsing">Parsing</h3>
+<pre class="prettyprint source lang-js"><code>const { parse } = require('kdljs')
+parse(`
+// Nodes can be separated into multiple lines
+title \
+  &quot;Some title&quot;
+`)
+
+// [
+//   {
+//     name: 'title',
+//     properties: {},
+//     values: [ 'Some title' ],
+//     children: [],
+//     tags: {
+//       name: undefined,
+//       properties: {},
+//       values: [ undefined ]
+//     }
+//   }
+// ]
+
+parse(`
+// Files must be utf8 encoded!
+smile &quot;😁&quot;
+`)
+
+// [
+//   {
+//     name: 'smile',
+//     properties: {},
+//     values: [ '😁' ],
+//     children: [],
+//     tags: {
+//       name: undefined,
+//       properties: {},
+//       values: [ undefined ]
+//     }
+//   }
+// ]
+
+parse(`
+// Instead of anonymous nodes, nodes and properties can be wrapped
+// in &quot;&quot; for arbitrary node names.
+&quot;!@#$@$%Q#$%~@!40&quot; &quot;1.2.3&quot; &quot;!!!!!&quot;=true
+`)
+
+// [
+//   {
+//     name: '!@#$@$%Q#$%~@!40',
+//     properties: { '!!!!!': true },
+//     values: [ '1.2.3' ],
+//     children: [],
+//     tags: {
+//       name: undefined,
+//       properties: { '!!!!!': undefined },
+//       values: [ undefined ]
+//     }
+//   }
+// ]
+
+parse(`
+// The following is a legal bare identifier:
+foo123~!@#$%^&*.:'|/?+ &quot;weeee&quot;
+
+// And you can also use unicode!
+ノード お名前＝&quot;☜(ﾟヮﾟ☜)&quot;
+`)
+
+// [
+//   {
+//     name: &quot;foo123~!@#$%^&*.:'|/?+&quot;,
+//     properties: {},
+//     values: [ 'weeee' ],
+//     children: [],
+//     tags: {
+//       name: undefined,
+//       properties: {},
+//       values: [ undefined ]
+//     }
+//   },
+//   {
+//     name: 'ノード',
+//     properties: { 'お名前': '☜(ﾟヮﾟ☜)' },
+//     values: [],
+//     children: [],
+//     tags: {
+//       name: undefined,
+//       properties: {},
+//       values: []
+//     }
+//   }
+// ]
+
+parse(`
+// kdl specifically allows properties and values to be
+// interspersed with each other, much like CLI commands.
+foo bar=true &quot;baz&quot; quux=false 1 2 3
+`)
+
+// [
+//   {
+//     name: 'foo',
+//     properties: { bar: true, quux: false },
+//     values: [ 'baz', 1, 2, 3 ],
+//     children: [],
+//     tags: {
+//       name: undefined,
+//       properties: { bar: undefined, quux: undefined },
+//       values: [ undefined, undefined, undefined, undefined ]
+//     }
+//   }
+// ]
+
+parse(`
+// kdl also allows for annotationg values with types, and
+// for denoting relations between nodes.
+package {
+  (author)person contact=(email)&quot;example@example.org&quot;
+  (contributor)person homepage=(url)&quot;https://example.org/example&quot;
+}
+
+// [
+//   {
+//     name: 'package',
+//     properties: {},
+//     values: [],
+//     children: [
+//       {
+//         name: 'person',
+//         properties: { contact: 'example@example.org' },
+//         values: [],
+//         children: [],
+//         tags: {
+//           name: 'author',
+//           properties: { contact: 'email' },
+//           values: []
+//         }
+//       },
+//       {
+//         name: 'person',
+//         properties: { homepage: 'https://example.org/example' },
+//         values: [],
+//         children: [],
+//         tags: {
+//           name: 'contributor',
+//           properties: { homepage: 'url' },
+//           values: []
+//         }
+//       }
+//     ]
+//   }
+// ]
+`)
+</code></pre>
+<h3 id="querying">Querying</h3>
+<pre class="prettyprint source lang-js"><code>const { parse, query } = require('kdljs')
+
+const { output: document } = parse(`package {
+    name &quot;foo&quot;
+    version &quot;1.0.0&quot;
+    dependencies platform=&quot;windows&quot; {
+        winapi &quot;1.0.0&quot; path=&quot;./crates/my-winapi-fork&quot;
+    }
+    dependencies {
+        miette &quot;2.0.0&quot; dev=true
+    }
+}`)
+
+query(document, 'package name') // or
+query(document, 'top() > package name')
+
+// [
+//   {
+//     name: 'name',
+//     values: ['foo'],
+//     ...
+//   }
+// ]
+
+query(document, 'dependencies')
+
+// [
+//   {
+//     name: 'dependencies',
+//     properties: { platform: 'windows' },
+//     ...
+//   },
+//   {
+//     name: 'dependencies',
+//     ...
+//   }
+// ]
+
+query(document, 'dependencies[platform]') // or
+query(document, 'dependencies[prop(platform)]')
+
+// [
+//   {
+//     name: 'dependencies',
+//     properties: { platform: 'windows' },
+//     ...
+//   }
+// ]
+
+query(document, 'dependencies > []')
+
+// [
+//   {
+//     name: 'winapi',
+//     properties: { path: './crates/my-winapi-fork' },
+//     values: [ '1.0.0' ],
+//     ...
+//   },
+//   {
+//     name: 'miette',
+//     properties: { dev: 'true' },
+//     values: [ '2.0.0' ],
+//     ...
+//   }
+// ]
+
+// MAP OPERATOR
+// ============
+
+query(document, 'package name => val()')
+// ['foo'].
+
+query(document, 'dependencies[platform] => platform')
+// ['windows']
+
+query(document, 'dependencies > [] => (name(), val(), path)')
+// [('winapi', '1.0.0', './crates/my-winapi-fork'), ('miette', '2.0.0', None)]
+
+query(document, 'dependencies > [] => (name(), values(), props())')
+// [('winapi', ['1.0.0'], {'platform': 'windows'}), ('miette', ['2.0.0'], {'dev': true})]
+</code></pre>
+<h3 id="formatting">Formatting</h3>
+<pre class="prettyprint source lang-js"><code>const { format } = require('kdljs')
+
+format([
+  {
+    name: 'title',
+    properties: {},
+    values: [ 'Some title' ],
+    children: [],
+    tags: { properties: {}, values: [] }
+  },
+  {
+    name: 'smile',
+    properties: {},
+    values: [ '😁' ],
+    children: [],
+    tags: { properties: {}, values: [] }
+  },
+  {
+    name: '!@#$@$%Q#$%~@!40',
+    properties: { '!!!!!': true },
+    values: [ '1.2.3' ],
+    children: [],
+    tags: { properties: {}, values: [] }
+  },
+  {
+    name: &quot;foo123~!@#$%^&*.:'|/?+&quot;,
+    properties: {},
+    values: [ 'weeee' ],
+    children: [],
+    tags: { properties: {}, values: [] }
+  },
+  {
+    name: 'ノード',
+    properties: { 'お名前': '☜(ﾟヮﾟ☜)' },
+    values: [],
+    children: [],
+    tags: { properties: {}, values: [] }
+  },
+  {
+    name: 'foo',
+    properties: { bar: true, quux: false },
+    values: [ 'baz', 1, 2, 3 ],
+    children: [],
+    tags: { properties: {}, values: [] }
+  }
+])
+
+`title &quot;Some title&quot;
+smile &quot;😁&quot;
+&quot;!@#$@$%Q#$%~@!40&quot; &quot;1.2.3&quot; !!!!!=true
+foo123~!@#$%^&*.:'|/?+ &quot;weeee&quot;
+ノード お名前=&quot;☜(ﾟヮﾟ☜)&quot;
+foo &quot;baz&quot; 1 2 3 bar=true quux=false
+`
+</code></pre>
+<h2 id="license">License</h2>
+<p>The code is available under the <a href="LICENSE">MIT license</a>. The example above is
+made available from https://github.com/kdl-org/kdl under
+<a href="https://github.com/kdl-org/kdl/blob/main/LICENSE.md">Creative Commons Attribution-ShareAlike 4.0 International</a>.
+The submodule in <code>test/kdl4j</code> is licensed according to its <code>LICENSE.md</code> file.</p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-kdljs.html">kdljs</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-kdljs.formatter.html">formatter</a></li><li><a href="module-kdljs.parser.html">parser</a></li><li><a href="module-kdljs.parser.base.html">base</a></li><li><a href="module-kdljs.parser.kdl.html">kdl</a></li><li><a href="module-kdljs.parser.kql.html">kql</a></li><li><a href="module-kdljs.queryEngine.html">queryEngine</a></li><li><a href="module-kdljs.validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-kdljs.parser.base.BaseParser.html">BaseParser</a></li><li><a href="module-kdljs.parser.kdl.KdlParser.html">KdlParser</a></li><li><a href="module-kdljs.parser.kql.KqlParser.html">KqlParser</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Mon Oct 16 2023 12:26:16 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
