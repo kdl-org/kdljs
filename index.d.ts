@@ -77,7 +77,7 @@ export function parse(text: string): ParseResult;
 /**
  * @param {Document} doc - Input KDL document
  */
-export function format( doc: Document, options?: FormattingOptions,): string;
+export function format(doc: Document, options?: FormattingOptions): string;
 
 /**
  * @param {Document} doc - Input KDL document
