@@ -1,3 +1,17 @@
+# [0.2.0](https://github.com/kdl-org/kdljs/compare/v0.1.5...v0.2.0) (2023-10-16)
+
+
+### Bug Fixes
+
+* **types:** remove kdljs typescript namespace ([eb85a26](https://github.com/kdl-org/kdljs/commit/eb85a2632c421a40f1c25dd27017f6beac708f24)), closes [#19](https://github.com/kdl-org/kdljs/issues/19)
+
+
+### BREAKING CHANGES
+
+* **types:** for typescript users.
+
+
+
 ## [0.1.5](https://github.com/kdl-org/kdljs/compare/v0.1.4...v0.1.5) (2022-09-26)
 
 
