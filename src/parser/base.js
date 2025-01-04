@@ -96,7 +96,8 @@ class BaseParser extends EmbeddedActionsParser {
             return sign * parseInt(number.slice(1), radix[number[0]])
           }
         },
-        { ALT: () => this.SUBRULE(this.rawString) }
+        { ALT: () => this.SUBRULE(this.rawString) },
+        { ALT: () => this.CONSUME(Tokens.Identifier).image }
       ])
     })
 
