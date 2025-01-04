@@ -70,7 +70,9 @@ class BaseParser extends EmbeddedActionsParser {
      */
     this.RULE('tag', () => {
       this.CONSUME(Tokens.LeftParenthesis)
+      this.OPTION(() => this.SUBRULE(this.nodeSpace))
       const tag = this.SUBRULE(this.string)
+      this.OPTION1(() => this.SUBRULE1(this.nodeSpace))
       this.CONSUME(Tokens.RightParenthesis)
       return tag
     })
@@ -205,6 +207,76 @@ class BaseParser extends EmbeddedActionsParser {
       }
 
       return String.fromCharCode(codepoint)
+    })
+
+    /**
+     * Consume node space
+     * @method #nodeSpace
+     * @memberof module:kdljs.parser.kdl.BaseParser
+     */
+    this.RULE('nodeSpace', () => {
+      this.AT_LEAST_ONE(() => this.OR([
+        { ALT: () => this.SUBRULE(this.whiteSpace) },
+        { ALT: () => this.SUBRULE(this.lineContinuation) }
+      ]))
+    })
+
+    /**
+     * Consume a line continuation
+     * @method #lineContinuation
+     * @memberof module:kdljs.parser.kdl.BaseParser
+     */
+    this.RULE('lineContinuation', () => {
+      this.CONSUME(Tokens.EscLine)
+      this.OPTION(() => this.SUBRULE(this.whiteSpace))
+      this.OR([
+        { ALT: () => this.SUBRULE(this.lineComment) },
+        { ALT: () => this.CONSUME(Tokens.NewLine) },
+        { ALT: () => this.CONSUME(Tokens.EOF) }
+      ])
+    })
+
+    /**
+     * Consume a line comment
+     * @method #lineComment
+     * @memberof module:kdljs.parser.kdl.BaseParser
+     */
+    this.RULE('lineComment', () => {
+      this.CONSUME(Tokens.LineComment)
+      this.OR([
+        { ALT: () => this.CONSUME(Tokens.NewLine) },
+        { ALT: () => this.CONSUME(Tokens.EOF) }
+      ])
+    })
+
+    /**
+     * Consume a multiline comment
+     * @method #multilineComment
+     * @memberof module:kdljs.parser.kdl.BaseParser
+     */
+    this.RULE('multilineComment', () => {
+      this.CONSUME(Tokens.OpenMultiLineComment)
+      this.MANY(() => {
+        this.OR([
+          { ALT: () => this.CONSUME(Tokens.MultiLineCommentContent) },
+          { ALT: () => this.SUBRULE(this.multilineComment) }
+        ])
+      })
+      this.CONSUME(Tokens.CloseMultiLineComment)
+    })
+
+    /**
+     * Consume whitespace
+     * @method #whiteSpace
+     * @memberof module:kdljs.parser.kdl.BaseParser
+     */
+    this.RULE('whiteSpace', () => {
+      this.AT_LEAST_ONE(() => {
+        this.OR([
+          { ALT: () => this.CONSUME(Tokens.WhiteSpace) },
+          { ALT: () => this.SUBRULE(this.multilineComment) }
+        ])
+      })
     })
   }
 
