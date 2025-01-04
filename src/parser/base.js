@@ -119,6 +119,12 @@ class BaseParser extends EmbeddedActionsParser {
               const escape = this.CONSUME(Tokens.UnicodeEscape).image.slice(3, -1)
               return String.fromCharCode(parseInt(escape, 16))
             }
+          },
+          {
+            ALT: () => {
+              this.CONSUME(Tokens.WhiteSpaceEscape)
+              return ''
+            }
           }
         ])
       })
