@@ -83,13 +83,11 @@ class KdlParser extends BaseParser {
         {
           ALT: () => {
             this.CONSUME(Tokens.BlockComment)
-            this.OPTION1(() => this.SUBRULE(this.nodeSpace))
+            this.OPTION1(() => this.SUBRULE(this.lineSpace))
             this.SUBRULE(this.node)
           }
         },
-        { ALT: () => this.SUBRULE(this.lineComment) },
-        { ALT: () => this.SUBRULE(this.whiteSpace) },
-        { ALT: () => this.CONSUME(Tokens.NewLine) },
+        { ALT: () => this.SUBRULE1(this.lineSpace) },
         { ALT: () => nodes.push(this.SUBRULE1(this.node)) }
       ]))
 
@@ -104,7 +102,11 @@ class KdlParser extends BaseParser {
      */
     this.RULE('node', () => {
       const tags = {
-        name: this.OPTION(() => this.SUBRULE(this.tag)),
+        name: this.OPTION(() => {
+          const tag = this.SUBRULE(this.tag)
+          this.OPTION1(() => this.SUBRULE(this.nodeSpace))
+          return tag
+        }),
         properties: {},
         values: []
       }
@@ -113,11 +115,11 @@ class KdlParser extends BaseParser {
       const values = []
 
       this.MANY(() => {
-        this.SUBRULE(this.nodeSpace)
+        this.SUBRULE1(this.nodeSpace)
 
-        const commented = this.OPTION1(() => {
+        const commented = this.OPTION2(() => {
           this.CONSUME(Tokens.BlockComment)
-          this.OPTION2(() => this.SUBRULE1(this.nodeSpace))
+          this.OPTION3(() => this.SUBRULE(this.lineSpace))
           return true
         })
 
@@ -150,7 +152,7 @@ class KdlParser extends BaseParser {
         this.SUBRULE(this.nodeChildrenSlashdash)
       })
 
-      const children = this.OPTION3(() => {
+      const children = this.OPTION4(() => {
         this.SUBRULE3(this.nodeSpace)
         const children = this.SUBRULE(this.nodeChildren)
         return children
@@ -161,7 +163,7 @@ class KdlParser extends BaseParser {
         this.SUBRULE1(this.nodeChildrenSlashdash)
       })
 
-      this.OPTION4(() => this.SUBRULE5(this.nodeSpace))
+      this.OPTION5(() => this.SUBRULE5(this.nodeSpace))
 
       if (this.LA(1).tokenType !== Tokens.RightBrace) {
         this.SUBRULE(this.nodeTerminator)
@@ -177,7 +179,7 @@ class KdlParser extends BaseParser {
      */
     this.RULE('nodeChildrenSlashdash', () => {
       this.CONSUME(Tokens.BlockComment)
-      this.OPTION(() => this.SUBRULE(this.nodeSpace))
+      this.OPTION(() => this.SUBRULE(this.lineSpace))
       this.SUBRULE(this.nodeChildren)
     })
 
@@ -185,11 +187,13 @@ class KdlParser extends BaseParser {
      * Consume a property
      * @method #property
      * @memberof module:kdljs.parser.kdl.KdlParser
-     * @return {Array<string,module:kdljs~Value>} key-value pair
+     * @return {[string, module:kdljs~Value>, string]} key-value-type tuple
      */
     this.RULE('property', () => {
       const key = this.SUBRULE(this.string)
+      this.OPTION(() => this.SUBRULE(this.nodeSpace))
       this.CONSUME(Tokens.Equals)
+      this.OPTION1(() => this.SUBRULE1(this.nodeSpace))
       const parts = this.SUBRULE(this.taggedValue)
       return [key, parts[0], parts[1]]
     })
@@ -198,10 +202,14 @@ class KdlParser extends BaseParser {
      * Consume a tagged value
      * @method #taggedValue
      * @memberof module:kdljs.parser.kdl.KdlParser
-     * @return {module:kdljs~Value}
+     * @return {[module:kdljs~Value, string]} value-type tuple
      */
     this.RULE('taggedValue', () => {
-      const tag = this.OPTION(() => this.SUBRULE(this.tag))
+      const tag = this.OPTION(() => {
+        const tag = this.SUBRULE(this.tag)
+        this.OPTION1(() => this.SUBRULE(this.nodeSpace))
+        return tag
+      })
       const value = this.SUBRULE(this.value)
       return [value, tag]
     })
@@ -220,30 +228,16 @@ class KdlParser extends BaseParser {
     })
 
     /**
-     * Consume node space
-     * @method #nodeSpace
+     * Consume line space
+     * @method #lineSpace
      * @memberof module:kdljs.parser.kdl.KdlParser
      */
-    this.RULE('nodeSpace', () => {
+    this.RULE('lineSpace', () => {
       this.AT_LEAST_ONE(() => this.OR([
-        { ALT: () => this.SUBRULE(this.whiteSpace) },
-        { ALT: () => this.SUBRULE(this.lineContinuation) }
-      ]))
-    })
-
-    /**
-     * Consume a line continuation
-     * @method #lineContinuation
-     * @memberof module:kdljs.parser.kdl.KdlParser
-     */
-    this.RULE('lineContinuation', () => {
-      this.CONSUME(Tokens.EscLine)
-      this.OPTION(() => this.SUBRULE1(this.whiteSpace))
-      this.OPTION1(() => this.CONSUME(Tokens.LineComment))
-      this.OR([
+        { ALT: () => this.SUBRULE(this.nodeSpace) },
         { ALT: () => this.CONSUME(Tokens.NewLine) },
-        { ALT: () => this.CONSUME(Tokens.EOF) }
-      ])
+        { ALT: () => this.SUBRULE(this.lineComment) }
+      ]))
     })
 
     /**
@@ -258,49 +252,6 @@ class KdlParser extends BaseParser {
         { ALT: () => this.CONSUME(Tokens.SemiColon) },
         { ALT: () => this.CONSUME(Tokens.EOF) }
       ])
-    })
-
-    /**
-     * Consume a line comment
-     * @method #lineComment
-     * @memberof module:kdljs.parser.kdl.KdlParser
-     */
-    this.RULE('lineComment', () => {
-      this.CONSUME(Tokens.LineComment)
-      this.OR([
-        { ALT: () => this.CONSUME(Tokens.NewLine) },
-        { ALT: () => this.CONSUME(Tokens.EOF) }
-      ])
-    })
-
-    /**
-     * Consume a multiline comment
-     * @method #multilineComment
-     * @memberof module:kdljs.parser.kdl.KdlParser
-     */
-    this.RULE('multilineComment', () => {
-      this.CONSUME(Tokens.OpenMultiLineComment)
-      this.MANY(() => {
-        this.OR([
-          { ALT: () => this.CONSUME(Tokens.MultiLineCommentContent) },
-          { ALT: () => this.SUBRULE(this.multilineComment) }
-        ])
-      })
-      this.CONSUME(Tokens.CloseMultiLineComment)
-    })
-
-    /**
-     * Consume whitespace
-     * @method #whiteSpace
-     * @memberof module:kdljs.parser.kdl.KdlParser
-     */
-    this.RULE('whiteSpace', () => {
-      this.AT_LEAST_ONE(() => {
-        this.OR([
-          { ALT: () => this.CONSUME(Tokens.WhiteSpace) },
-          { ALT: () => this.SUBRULE(this.multilineComment) }
-        ])
-      })
     })
 
     this.performSelfAnalysis()

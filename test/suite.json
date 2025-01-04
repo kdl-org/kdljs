@@ -54,5 +54,19 @@
       "name": "node",
       "children": [{ "name": "foo" }, { "name": "bar" }]
     }
+  ],
+  "node_spaces": [
+    {
+      "name": "node",
+      "properties": {
+        "prop": "value"
+      },
+      "tags": {
+        "name": "tag",
+        "properties": {
+          "prop": "tag"
+        }
+      }
+    }
   ]
 }
