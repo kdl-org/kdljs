@@ -46,6 +46,7 @@ const Identifier = createToken({
 })
 const Boolean = createToken({ name: 'Boolean', pattern: /#true|#false/ })
 const Null = createToken({ name: 'Null', pattern: /#null/ })
+const FloatKeyword = createToken({ name: 'FloatKeyword', pattern: /#inf|#-inf|#nan/ })
 const RawString = createToken({
   name: 'RawString',
   pattern: /(#+)"[^\x00-\x08\x0E-\x19\x7F\u202A-\u202E\u2066-\u2069]*?"\1/,
@@ -114,6 +115,7 @@ module.exports = {
   LineComment,
   Boolean,
   Null,
+  FloatKeyword,
   RawString,
   Integer,
   Float,

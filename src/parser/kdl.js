@@ -19,6 +19,7 @@ const tokens = {
       Tokens.OpenMultiLineComment,
       Tokens.Boolean,
       Tokens.Null,
+      Tokens.FloatKeyword,
       Tokens.RawString,
       Tokens.Integer,
       Tokens.Float,

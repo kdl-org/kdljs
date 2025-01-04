@@ -32,6 +32,16 @@ const radix = {
 }
 
 /**
+ * @type Object<string, number>
+ * @memberof module:kdljs.parser.base
+ */
+const floatKeywords = {
+  '#inf': Infinity,
+  '#-inf': -Infinity,
+  '#nan': NaN
+}
+
+/**
  * @class
  * @memberof module:kdljs.parser.base
  */
@@ -80,6 +90,12 @@ class BaseParser extends EmbeddedActionsParser {
           ALT: () => {
             this.CONSUME(Tokens.Null)
             return null
+          }
+        },
+        {
+          ALT: () => {
+            const keyword = this.CONSUME(Tokens.FloatKeyword).image
+            return floatKeywords[keyword]
           }
         },
         {
