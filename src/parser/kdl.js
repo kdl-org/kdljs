@@ -104,7 +104,7 @@ class KdlParser extends BaseParser {
      */
     this.RULE('node', () => {
       const tags = {
-        name: this.OPTION1(() => this.SUBRULE(this.tag)),
+        name: this.OPTION(() => this.SUBRULE(this.tag)),
         properties: {},
         values: []
       }
@@ -112,80 +112,73 @@ class KdlParser extends BaseParser {
       const properties = {}
       const values = []
 
-      const next = this.LA(1).tokenType
-      if (next !== Tokens.NewLine && next !== Tokens.SemiColon && next !== Tokens.EOF) {
-        this.SUBRULE(this.nodeSpace)
-      }
-
       this.MANY(() => {
+        this.SUBRULE(this.nodeSpace)
+
+        const commented = this.OPTION1(() => {
+          this.CONSUME(Tokens.BlockComment)
+          this.OPTION2(() => this.SUBRULE1(this.nodeSpace))
+          return true
+        })
+
         this.OR1([
           {
             GATE: this.BACKTRACK(this.property),
             ALT: () => {
               const parts = this.SUBRULE(this.property)
-              properties[parts[0]] = parts[1]
-              tags.properties[parts[0]] = parts[2]
+              if (!commented) {
+                properties[parts[0]] = parts[1]
+                tags.properties[parts[0]] = parts[2]
+              }
             }
           },
           {
             GATE: this.BACKTRACK(this.taggedValue),
             ALT: () => {
               const parts = this.SUBRULE(this.taggedValue)
-              values.push(parts[0])
-              tags.values.push(parts[1])
-            }
-          },
-          {
-            ALT: () => {
-              this.CONSUME(Tokens.BlockComment)
-              this.OPTION2(() => this.SUBRULE(this.nodeSpace))
-              this.OR([
-                {
-                  GATE: this.BACKTRACK(this.property),
-                  ALT: () => this.SUBRULE1(this.property)
-                },
-                {
-                  GATE: this.BACKTRACK(this.taggedValue),
-                  ALT: () => this.SUBRULE1(this.taggedValue)
-                }
-              ])
+              if (!commented) {
+                values.push(parts[0])
+                tags.values.push(parts[1])
+              }
             }
           }
         ])
-
-        const next = this.LA(1).tokenType
-        if (next !== Tokens.LeftBrace && next !== Tokens.NewLine &&
-            next !== Tokens.SemiColon && next !== Tokens.EOF) {
-          this.SUBRULE1(this.nodeSpace)
-        }
       })
 
-      const children = this.OR2([
-        {
-          ALT: () => {
-            const children = this.SUBRULE(this.nodeChildren)
-            this.OPTION(() => this.SUBRULE(this.nodeTerminator))
-            return children
-          }
-        },
-        {
-          ALT: () => {
-            this.SUBRULE1(this.nodeTerminator)
-            return []
-          }
-        },
-        {
-          ALT: () => {
-            this.CONSUME1(Tokens.BlockComment)
-            this.OPTION3(() => this.SUBRULE1(this.nodeSpace))
-            this.SUBRULE1(this.nodeChildren)
-            this.OPTION4(() => this.SUBRULE2(this.nodeTerminator))
-            return []
-          }
-        }
-      ])
+      this.MANY1(() => {
+        this.SUBRULE2(this.nodeSpace)
+        this.SUBRULE(this.nodeChildrenSlashdash)
+      })
+
+      const children = this.OPTION3(() => {
+        this.SUBRULE3(this.nodeSpace)
+        const children = this.SUBRULE(this.nodeChildren)
+        return children
+      }) ?? []
+
+      this.MANY2(() => {
+        this.SUBRULE4(this.nodeSpace)
+        this.SUBRULE1(this.nodeChildrenSlashdash)
+      })
+
+      this.OPTION4(() => this.SUBRULE5(this.nodeSpace))
+
+      if (this.LA(1).tokenType !== Tokens.RightBrace) {
+        this.SUBRULE(this.nodeTerminator)
+      }
 
       return { name, properties, values, children, tags }
+    })
+
+    /**
+     * Consume slashdashed node children
+     * @method #nodeChildrenSlashdash
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     */
+    this.RULE('nodeChildrenSlashdash', () => {
+      this.CONSUME(Tokens.BlockComment)
+      this.OPTION(() => this.SUBRULE(this.nodeSpace))
+      this.SUBRULE(this.nodeChildren)
     })
 
     /**
@@ -227,7 +220,7 @@ class KdlParser extends BaseParser {
     })
 
     /**
-     * Consume a node pace
+     * Consume node space
      * @method #nodeSpace
      * @memberof module:kdljs.parser.kdl.KdlParser
      */
