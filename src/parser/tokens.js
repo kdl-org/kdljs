@@ -48,7 +48,7 @@ const Boolean = createToken({ name: 'Boolean', pattern: /true|false/, longer_alt
 const Null = createToken({ name: 'Null', pattern: /null/, longer_alt: Identifier })
 const RawString = createToken({
   name: 'RawString',
-  pattern: /r(#*)"[^\x00-\x08\x0E-\x19\x7F\u202A-\u202E\u2066-\u2069]*?"\1/,
+  pattern: /(#+)"[^\x00-\x08\x0E-\x19\x7F\u202A-\u202E\u2066-\u2069]*?"\1/,
   line_breaks: true
 })
 const Float = createToken({
