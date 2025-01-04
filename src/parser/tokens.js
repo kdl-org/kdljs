@@ -20,7 +20,7 @@ const BlockComment = createToken({ name: 'BlockComment', pattern: /\/-/ })
 const LineComment = createToken({
   name: 'LineComment',
   // eslint-disable-next-line no-control-regex
-  pattern: /\/\/[^\x00-\x19\x7F\x85\u2028-\u202E\u2066-\u2069]*/,
+  pattern: /\/\/[^\x00-\x19\x7F\x85\u200E\u200F\u2028-\u202E\u2066-\u2069\uD800-\uDFFF]*/,
   line_breaks: true
 })
 const OpenMultiLineComment = createToken({
@@ -42,14 +42,14 @@ const CloseMultiLineComment = createToken({
 // Values
 const Identifier = createToken({
   name: 'Identifier',
-  pattern: /(?![+-]\d|[+-]?\.\d)[\x21\x24-\x27\x2A-\x2E\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E\x80-\x84\x86-\u2027\u202F-\u2065\u206A-\uFFFF][\x21\x24-\x27\x2A-\x2E\x30-\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E\x80-\x84\x86-\u2027\u202F-\u2065\u206A-\uFFFF]*/
+  pattern: /(?![+-]?\.?\d)[\x21\x24-\x27\x2A-\x2E\x30-\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E\x80-\x84\x86-\u200D\u2010-\u2027\u202F-\u2065\u206A-\uD7FF\uE000-\uFFFF]+/
 })
 const Boolean = createToken({ name: 'Boolean', pattern: /#true|#false/ })
 const Null = createToken({ name: 'Null', pattern: /#null/ })
 const FloatKeyword = createToken({ name: 'FloatKeyword', pattern: /#inf|#-inf|#nan/ })
 const RawString = createToken({
   name: 'RawString',
-  pattern: /(#+)"[^\x00-\x08\x0E-\x19\x7F\u202A-\u202E\u2066-\u2069]*?"\1/,
+  pattern: /(#+)"[^\x00-\x08\x0E-\x19\x7F\u200E\u200F\u202A-\u202E\u2066-\u2069\uD800-\uDFFF]*?"\1/,
   line_breaks: true
 })
 const Float = createToken({
@@ -75,7 +75,7 @@ const Unknown = createToken({ name: 'Unknown', pattern: /[^]/ })
 const OpenQuote = createToken({ name: 'OpenQuote', pattern: /"/, push_mode: 'string' })
 const Unicode = createToken({
   name: 'Unicode',
-  pattern: /[^\\"\x00-\x08\x0A-\x19\x0E-\x1A\x7F\x85\u2028-\u202E\u2066-\u2069]+/
+  pattern: /[^\\"\x00-\x08\x0A-\x19\x0E-\x1A\x7F\x85\u200E\u200F\u2028-\u202E\u2066-\u2069\uD800-\uDFFF]+/
 })
 const Escape = createToken({ name: 'Escape', pattern: /\\[nrt\\"bfs]/ })
 const UnicodeEscape = createToken({ name: 'UnicodeEscape', pattern: /\\u\{([0-9a-fA-F]{1,5}|10[0-9a-fA-F]{4})\}/ })
