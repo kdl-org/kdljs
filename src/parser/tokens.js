@@ -20,7 +20,7 @@ const BlockComment = createToken({ name: 'BlockComment', pattern: /\/-/ })
 const LineComment = createToken({
   name: 'LineComment',
   // eslint-disable-next-line no-control-regex
-  pattern: /\/\/[^\x0A-\x0D\x85\u2028\u2029]*/,
+  pattern: /\/\/[^\x00-\x19\x7F\x85\u2028-\u202E\u2066-\u2069]*/,
   line_breaks: true
 })
 const OpenMultiLineComment = createToken({
@@ -42,13 +42,13 @@ const CloseMultiLineComment = createToken({
 // Values
 const Identifier = createToken({
   name: 'Identifier',
-  pattern: /(?![+-]\d)[\x21\x23-\x27\x2A-\x2E\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21\x23-\x27\x2A-\x2E\x30-\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*/
+  pattern: /(?![+-]\d)[\x21\x23-\x27\x2A-\x2E\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E\x80-\x84\x86-\u2027\u202F-\u2065\u206A-\uFFFF][\x21\x23-\x27\x2A-\x2E\x30-\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E\x80-\x84\x86-\u2027\u202F-\u2065\u206A-\uFFFF]*/
 })
 const Boolean = createToken({ name: 'Boolean', pattern: /true|false/, longer_alt: Identifier })
 const Null = createToken({ name: 'Null', pattern: /null/, longer_alt: Identifier })
 const RawString = createToken({
   name: 'RawString',
-  pattern: /r(#*)"[^]*?"\1/,
+  pattern: /r(#*)"[^\x00-\x08\x0E-\x19\x7F\u202A-\u202E\u2066-\u2069]*?"\1/,
   line_breaks: true
 })
 const Float = createToken({
@@ -74,12 +74,15 @@ const Unknown = createToken({ name: 'Unknown', pattern: /[^]/ })
 const OpenQuote = createToken({ name: 'OpenQuote', pattern: /"/, push_mode: 'string' })
 const Unicode = createToken({
   name: 'Unicode',
-  pattern: /[^\\"]+/,
-  line_breaks: true
+  pattern: /[^\\"\x00-\x08\x0A-\x19\x0E-\x1A\x7F\x85\u2028-\u202E\u2066-\u2069]+/
 })
 const Escape = createToken({ name: 'Escape', pattern: /\\[nrt\\"bfs]/ })
 const UnicodeEscape = createToken({ name: 'UnicodeEscape', pattern: /\\u\{([0-9a-fA-F]{1,5}|10[0-9a-fA-F]{4})\}/ })
-const WhiteSpaceEscape = createToken({ name: 'WhiteSpaceEscape', pattern: /\\[\x09\x0A-\x0D\x20\x85\xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]+/ })
+const WhiteSpaceEscape = createToken({
+  name: 'WhiteSpaceEscape',
+  pattern: /\\[\x09\x0A-\x0D\x20\x85\xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]+/,
+  line_breaks: true
+})
 const CloseQuote = createToken({ name: 'CloseQuote', pattern: /"/, pop_mode: true })
 
 // Query language
