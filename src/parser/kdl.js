@@ -41,6 +41,7 @@ const tokens = {
       Tokens.Unicode,
       Tokens.Escape,
       Tokens.UnicodeEscape,
+      Tokens.WhiteSpaceEscape,
       Tokens.CloseQuote
     ]
   }
@@ -231,15 +232,23 @@ class KdlParser extends BaseParser {
     this.RULE('nodeSpace', () => {
       this.AT_LEAST_ONE(() => this.OR([
         { ALT: () => this.SUBRULE(this.whiteSpace) },
-        {
-          ALT: () => {
-            this.CONSUME(Tokens.EscLine)
-            this.OPTION(() => this.SUBRULE1(this.whiteSpace))
-            this.OPTION1(() => this.CONSUME(Tokens.LineComment))
-            this.CONSUME(Tokens.NewLine)
-          }
-        }
+        { ALT: () => this.SUBRULE(this.lineContinuation) }
       ]))
+    })
+
+    /**
+     * Consume a line continuation
+     * @method #lineContinuation
+     * @memberof module:kdljs.parser.kdl.KdlParser
+     */
+    this.RULE('lineContinuation', () => {
+      this.CONSUME(Tokens.EscLine)
+      this.OPTION(() => this.SUBRULE1(this.whiteSpace))
+      this.OPTION1(() => this.CONSUME(Tokens.LineComment))
+      this.OR([
+        { ALT: () => this.CONSUME(Tokens.NewLine) },
+        { ALT: () => this.CONSUME(Tokens.EOF) }
+      ])
     })
 
     /**
