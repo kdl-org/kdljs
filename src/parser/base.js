@@ -156,12 +156,7 @@ class BaseParser extends EmbeddedActionsParser {
         string += this.OR([
           { ALT: () => this.CONSUME(Tokens.Unicode).image },
           { ALT: () => escapes[this.CONSUME(Tokens.Escape).image] },
-          {
-            ALT: () => {
-              const escape = this.CONSUME(Tokens.UnicodeEscape).image.slice(3, -1)
-              return String.fromCharCode(parseInt(escape, 16))
-            }
-          },
+          { ALT: () => this.SUBRULE(this.unicodeEscape) },
           {
             ALT: () => {
               this.CONSUME(Tokens.WhiteSpaceEscape)
@@ -185,6 +180,27 @@ class BaseParser extends EmbeddedActionsParser {
       const string = this.CONSUME(Tokens.RawString).image
       const start = string.indexOf('"')
       return string.slice(start + 1, -start)
+    })
+
+    /**
+     * Consume a Unicode escape
+     * @method #unicodeEscape
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {string}
+     */
+    this.RULE('unicodeEscape', () => {
+      const prevToken = this.LA(0)
+      const escape = this.CONSUME(Tokens.UnicodeEscape)
+      const codepoint = parseInt(escape.image.slice(3, -1), 16)
+
+      // Unicode scalar values
+      if (codepoint >= 0xD800 && codepoint <= 0xDFFF) {
+        const message = 'Strings may not contain escaped Unicode Scalar Values (U+D800 to U+DFFF)'
+        const error = new MismatchedTokenException(message, escape, prevToken)
+        throw this.SAVE_ERROR(error)
+      }
+
+      return String.fromCharCode(codepoint)
     })
   }
 
