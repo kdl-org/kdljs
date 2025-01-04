@@ -64,6 +64,7 @@ class KdlParser extends BaseParser {
      * @return {module:kdljs~Document}
      */
     this.RULE('document', () => {
+      this.OPTION(() => this.CONSUME(Tokens.BOM))
       const nodes = this.SUBRULE(this.nodes)
       this.CONSUME(Tokens.EOF)
       return nodes
@@ -303,7 +304,6 @@ class KdlParser extends BaseParser {
     this.RULE('whiteSpace', () => {
       this.AT_LEAST_ONE(() => {
         this.OR([
-          { ALT: () => this.CONSUME(Tokens.BOM) },
           { ALT: () => this.CONSUME(Tokens.WhiteSpace) },
           { ALT: () => this.SUBRULE(this.multilineComment) }
         ])
