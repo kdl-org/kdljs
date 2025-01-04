@@ -49,6 +49,7 @@ const Null = createToken({ name: 'Null', pattern: /#null/ })
 const FloatKeyword = createToken({ name: 'FloatKeyword', pattern: /#inf|#-inf|#nan/ })
 const RawString = createToken({
   name: 'RawString',
+  // eslint-disable-next-line no-control-regex
   pattern: /(#+)"[^\x00-\x08\x0E-\x19\x7F\u200E\u200F\u202A-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]*?"\1/,
   line_breaks: true
 })
@@ -75,12 +76,14 @@ const Unknown = createToken({ name: 'Unknown', pattern: /[^]/ })
 const OpenQuote = createToken({ name: 'OpenQuote', pattern: /"/, push_mode: 'string' })
 const Unicode = createToken({
   name: 'Unicode',
+  // eslint-disable-next-line no-control-regex
   pattern: /[^\\"\x00-\x08\x0A-\x19\x0E-\x1A\x7F\x85\u200E\u200F\u2028-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]+/
 })
 const Escape = createToken({ name: 'Escape', pattern: /\\[nrt\\"bfs]/ })
 const UnicodeEscape = createToken({ name: 'UnicodeEscape', pattern: /\\u\{([0-9a-fA-F]{1,5}|10[0-9a-fA-F]{4})\}/ })
 const WhiteSpaceEscape = createToken({
   name: 'WhiteSpaceEscape',
+  // eslint-disable-next-line no-control-regex
   pattern: /\\[\x09\x0A-\x0D\x20\x85\xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000]+/,
   line_breaks: true
 })
