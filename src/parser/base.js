@@ -3,7 +3,7 @@
  * @memberof module:kdljs.parser
  */
 
-const { EmbeddedActionsParser } = require('chevrotain')
+const { EmbeddedActionsParser, MismatchedTokenException } = require('chevrotain')
 const Tokens = require('./tokens.js')
 
 /**
@@ -42,6 +42,19 @@ const floatKeywords = {
 }
 
 /**
+ * @type Set<string>
+ * @memberof module:kdljs.parser.base
+ */
+const bannedIdentifiers = new Set([
+  'true',
+  'false',
+  'null',
+  'inf',
+  '-inf',
+  'nan'
+])
+
+/**
  * @class
  * @memberof module:kdljs.parser.base
  */
@@ -56,11 +69,23 @@ class BaseParser extends EmbeddedActionsParser {
      * @return {string}
      */
     this.RULE('identifier', () => {
-      return this.OR([
+      // For error reporting
+      const prevToken = this.LA(0)
+      const token = this.LA(1)
+
+      const identifier = this.OR([
         { ALT: () => this.CONSUME(Tokens.Identifier).image },
         { ALT: () => this.SUBRULE(this.string) },
         { ALT: () => this.SUBRULE(this.rawString) }
       ])
+
+      if (bannedIdentifiers.has(identifier)) {
+        const message = 'Identifier string may not be a keyword'
+        const error = new MismatchedTokenException(message, token, prevToken)
+        throw this.SAVE_ERROR(error)
+      }
+
+      return identifier
     })
 
     /**
