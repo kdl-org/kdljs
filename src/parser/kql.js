@@ -150,7 +150,7 @@ class KqlParser extends BaseParser {
           ALT: () => ({
             accessor: { type: 'name' },
             operator: '=',
-            value: this.SUBRULE(this.identifier)
+            value: this.SUBRULE(this.string)
           })
         },
         {
@@ -230,7 +230,7 @@ class KqlParser extends BaseParser {
         {
           ALT: () => {
             this.CONSUME(Tokens.PropAccessor)
-            const parameter = this.SUBRULE(this.identifier)
+            const parameter = this.SUBRULE(this.string)
             this.CONSUME1(Tokens.RightParenthesis)
 
             return { type: 'prop', parameter }
@@ -246,7 +246,7 @@ class KqlParser extends BaseParser {
         },
         {
           ALT: () => {
-            const parameter = this.SUBRULE1(this.identifier)
+            const parameter = this.SUBRULE1(this.string)
             return { type: 'prop', parameter }
           }
         }

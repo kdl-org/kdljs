@@ -108,7 +108,7 @@ class KdlParser extends BaseParser {
         properties: {},
         values: []
       }
-      const name = this.SUBRULE(this.identifier)
+      const name = this.SUBRULE(this.string)
       const properties = {}
       const values = []
 
@@ -195,7 +195,7 @@ class KdlParser extends BaseParser {
      * @return {Array<string,module:kdljs~Value>} key-value pair
      */
     this.RULE('property', () => {
-      const key = this.SUBRULE(this.identifier)
+      const key = this.SUBRULE(this.string)
       this.CONSUME(Tokens.Equals)
       const parts = this.SUBRULE(this.taggedValue)
       return [key, parts[0], parts[1]]

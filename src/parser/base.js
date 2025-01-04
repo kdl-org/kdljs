@@ -63,32 +63,6 @@ class BaseParser extends EmbeddedActionsParser {
     super(tokens)
 
     /**
-     * Consume an identifier
-     * @method #identifier
-     * @memberof module:kdljs.parser.base.BaseParser
-     * @return {string}
-     */
-    this.RULE('identifier', () => {
-      // For error reporting
-      const prevToken = this.LA(0)
-      const token = this.LA(1)
-
-      const identifier = this.OR([
-        { ALT: () => this.CONSUME(Tokens.Identifier).image },
-        { ALT: () => this.SUBRULE(this.string) },
-        { ALT: () => this.SUBRULE(this.rawString) }
-      ])
-
-      if (bannedIdentifiers.has(identifier)) {
-        const message = 'Identifier string may not be a keyword'
-        const error = new MismatchedTokenException(message, token, prevToken)
-        throw this.SAVE_ERROR(error)
-      }
-
-      return identifier
-    })
-
-    /**
      * Consume a tag
      * @method #tag
      * @memberof module:kdljs.parser.base.BaseParser
@@ -96,7 +70,7 @@ class BaseParser extends EmbeddedActionsParser {
      */
     this.RULE('tag', () => {
       this.CONSUME(Tokens.LeftParenthesis)
-      const tag = this.SUBRULE(this.identifier)
+      const tag = this.SUBRULE(this.string)
       this.CONSUME(Tokens.RightParenthesis)
       return tag
     })
@@ -136,9 +110,7 @@ class BaseParser extends EmbeddedActionsParser {
             const number = token.replace(/^[+-]?0|_/g, '')
             return sign * parseInt(number.slice(1), radix[number[0]])
           }
-        },
-        { ALT: () => this.SUBRULE(this.rawString) },
-        { ALT: () => this.CONSUME(Tokens.Identifier).image }
+        }
       ])
     })
 
@@ -149,6 +121,38 @@ class BaseParser extends EmbeddedActionsParser {
      * @return {string}
      */
     this.RULE('string', () => {
+      return this.OR([
+        { ALT: () => this.SUBRULE(this.identifierString) },
+        { ALT: () => this.SUBRULE(this.quotedString) },
+        { ALT: () => this.SUBRULE(this.rawString) }
+      ])
+    })
+
+    /**
+     * Consume an identifierString
+     * @method #identifierString
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {string}
+     */
+    this.RULE('identifierString', () => {
+      const prevToken = this.LA(0)
+      const identifier = this.CONSUME(Tokens.Identifier)
+
+      if (bannedIdentifiers.has(identifier.image)) {
+        const error = new MismatchedTokenException('Bare identifier string must not be a keyword', identifier, prevToken)
+        throw this.SAVE_ERROR(error)
+      }
+
+      return identifier.image
+    })
+
+    /**
+     * Consume a quoted string
+     * @method #quotedString
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {string}
+     */
+    this.RULE('quotedString', () => {
       let string = ''
 
       this.CONSUME(Tokens.OpenQuote)
