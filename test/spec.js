@@ -6,18 +6,16 @@ const fs = require('fs')
 const suite = require('./suite.json')
 const { parse, format } = require('../')
 
-function prepareExpectations (output) {
-  return output.map(node => ({
-    name: 'node',
-    values: [],
-    properties: {},
-    children: [],
-    ...node,
+function prepareExpectations (nodes) {
+  return nodes.map(node => ({
+    name: node.name ?? 'node',
+    values: node.values ?? [],
+    properties: node.properties ?? {},
+    children: node.children ? prepareExpectations(node.children) : [],
     tags: {
-      name: undefined,
-      values: Array(node.values ? node.values.length : 0).fill(undefined),
-      properties: {},
-      ...(node.tags || {})
+      name: node.tags?.name,
+      values: node.tags?.values ?? Array(node.values ? node.values.length : 0).fill(undefined),
+      properties: node.tags?.properties ?? {}
     }
   }))
 }

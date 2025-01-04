@@ -48,5 +48,11 @@
   "tag_value": [
     { "name": "node", "values": ["value"], "tags": { "values": ["tag"] } },
     { "name": "node", "properties": { "key": "value" }, "tags": { "properties": { "key": "tag" } } }
+  ],
+  "node_children_unterminated_final_child": [
+    {
+      "name": "node",
+      "children": [{ "name": "foo" }, { "name": "bar" }]
+    }
   ]
 }
