@@ -44,8 +44,8 @@ const Identifier = createToken({
   name: 'Identifier',
   pattern: /(?![+-]\d)[\x21\x24-\x27\x2A-\x2E\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E\x80-\x84\x86-\u2027\u202F-\u2065\u206A-\uFFFF][\x21\x24-\x27\x2A-\x2E\x30-\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E\x80-\x84\x86-\u2027\u202F-\u2065\u206A-\uFFFF]*/
 })
-const Boolean = createToken({ name: 'Boolean', pattern: /true|false/, longer_alt: Identifier })
-const Null = createToken({ name: 'Null', pattern: /null/, longer_alt: Identifier })
+const Boolean = createToken({ name: 'Boolean', pattern: /#true|#false/ })
+const Null = createToken({ name: 'Null', pattern: /#null/ })
 const RawString = createToken({
   name: 'RawString',
   pattern: /(#+)"[^\x00-\x08\x0E-\x19\x7F\u202A-\u202E\u2066-\u2069]*?"\1/,

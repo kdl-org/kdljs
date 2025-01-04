@@ -75,7 +75,7 @@ class BaseParser extends EmbeddedActionsParser {
     this.RULE('value', () => {
       return this.OR([
         { ALT: () => this.SUBRULE(this.string) },
-        { ALT: () => this.CONSUME(Tokens.Boolean).image === 'true' },
+        { ALT: () => this.CONSUME(Tokens.Boolean).image === '#true' },
         {
           ALT: () => {
             this.CONSUME(Tokens.Null)
