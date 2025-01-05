@@ -214,7 +214,7 @@ class KdlParser extends BaseParser {
      * Consume a property
      * @method #property
      * @memberof module:kdljs.parser.kdl.KdlParser
-     * @return {[string, module:kdljs~Value>, string]} key-value-type tuple
+     * @return {Array<module:kdljs~Value>} key-value-type tuple
      */
     this.RULE('property', () => {
       const key = this.SUBRULE(this.string)
@@ -229,7 +229,7 @@ class KdlParser extends BaseParser {
      * Consume an argument
      * @method #argument
      * @memberof module:kdljs.parser.kdl.KdlParser
-     * @return {[module:kdljs~Value, string]} value-type tuple
+     * @return {Array<module:kdljs~Value>} value-type tuple
      */
     this.RULE('argument', () => {
       const tag = this.OPTION(() => {
