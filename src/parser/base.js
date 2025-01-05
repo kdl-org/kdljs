@@ -216,7 +216,6 @@ class BaseParser extends EmbeddedActionsParser {
       this.CONSUME(Tokens.MultiLineCloseQuote)
 
       return this.ACTION(() => {
-        const whitespacePattern = new RegExp('^(' + Tokens.WhiteSpace.PATTERN.source + ')$')
         const end = lines.pop()
 
         if (end.line !== '') {
