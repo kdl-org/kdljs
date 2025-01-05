@@ -42,8 +42,8 @@ describe('Custom tests', function () {
         })
       } else {
         it('fails to parse', function () {
-          const actual = parse(input)
-          assert.strictEqual(actual.output, undefined)
+          const { errors } = parse(input)
+          assert.notDeepStrictEqual(errors, [])
         })
       }
     })
@@ -119,8 +119,8 @@ describe('Official test suite', function () {
         }
       } else {
         it('fails to parse', function () {
-          assert.deepStrictEqual(parse(input).output, undefined)
-          assert.notDeepStrictEqual(parse(input).errors, [])
+          const { errors } = parse(input)
+          assert.notDeepStrictEqual(errors, [])
         })
       }
     })

@@ -48,13 +48,14 @@ const tokens = {
       Tokens.CloseQuote
     ],
     multilineString: [
+      Tokens.MultiLineCloseQuote,
+      Tokens.MultiLineSingleQuote,
       Tokens.NewLine,
       Tokens.WhiteSpace,
       Tokens.Unicode,
       Tokens.Escape,
       Tokens.UnicodeEscape,
-      Tokens.WhiteSpaceEscape,
-      Tokens.MultiLineCloseQuote
+      Tokens.WhiteSpaceEscape
     ]
   }
 }

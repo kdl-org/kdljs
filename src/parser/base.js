@@ -18,7 +18,8 @@ const escapes = {
   '\\/': '/',
   '\\"': '"',
   '\\b': '\x08',
-  '\\f': '\x0C'
+  '\\f': '\x0C',
+  '\\s': '\x20'
 }
 
 /**
@@ -185,47 +186,66 @@ class BaseParser extends EmbeddedActionsParser {
      * @return {string}
      */
     this.RULE('multilineString', () => {
+      this.CONSUME(Tokens.MultiLineOpenQuote)
+
       const lines = []
 
-      this.CONSUME(Tokens.MultiLineOpenQuote)
-      let previousToken = this.CONSUME(Tokens.NewLine)
-      this.MANY(() => {
+      this.AT_LEAST_ONE(() => {
+        const newline = this.CONSUME(Tokens.NewLine)
         const prefix = this.OPTION(() => this.CONSUME(Tokens.WhiteSpace))
-
         let line = ''
-        this.MANY2(() => {
-          line += this.OR([
-            { ALT: () => this.CONSUME1(Tokens.WhiteSpace).image },
-            { ALT: () => this.CONSUME(Tokens.Unicode).image },
-            { ALT: () => escapes[this.CONSUME(Tokens.Escape).image] },
-            { ALT: () => this.SUBRULE(this.unicodeEscape) },
+
+        this.MANY1(() => {
+          this.OR([
+            { ALT: () => { line += this.CONSUME(Tokens.MultiLineSingleQuote).image } },
+            { ALT: () => { line += this.CONSUME(Tokens.Unicode).image } },
+            { ALT: () => { line += escapes[this.CONSUME(Tokens.Escape).image] } },
+            { ALT: () => { line += this.SUBRULE(this.unicodeEscape) } },
+            { ALT: () => { this.CONSUME(Tokens.WhiteSpaceEscape) } },
+            { ALT: () => { line += this.CONSUME1(Tokens.WhiteSpace).image } },
             {
-              ALT: () => {
-                this.CONSUME(Tokens.WhiteSpaceEscape)
-                return ''
-              }
+              GATE: () => this.LA(1).tokenType === Tokens.MultiLineCloseQuote,
+              ALT: () => {}
             }
           ])
         })
-        lines.push({ previousToken, prefix, line })
-        previousToken = this.CONSUME1(Tokens.NewLine)
+
+        lines.push({ line, prefix, newline })
       })
 
-      const prefix = this.OPTION1(() => this.CONSUME2(Tokens.WhiteSpace).image) ?? ''
       this.CONSUME(Tokens.MultiLineCloseQuote)
 
-      if (prefix.length > 0) {
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].prefix && lines[i].prefix.image.startsWith(prefix)) {
-            lines[i] = lines[i].prefix.image.slice(prefix.length) + lines[i].line
-          } else {
-            const error = new MismatchedTokenException('Multiline string cannot be dedented', lines[i].prefix, lines[i].previousToken)
-            throw this.SAVE_ERROR(error)
-          }
-        }
-      }
+      return this.ACTION(() => {
+        const whitespacePattern = new RegExp('^(' + Tokens.WhiteSpace.PATTERN.source + ')$')
+        const end = lines.pop()
 
-      return lines.join('\n')
+        if (end.line !== '') {
+          const error = new MismatchedTokenException('Multiline string cannot be dedented', end.prefix, end.newline)
+          this.SAVE_ERROR(error)
+        }
+
+        const prefix = end.prefix ? end.prefix.image : ''
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].line.length === 0) {
+            lines[i] = ''
+            continue
+          }
+
+          if (prefix) {
+            if (lines[i].prefix && lines[i].prefix.image.startsWith(prefix)) {
+              lines[i] = lines[i].prefix.image.slice(prefix.length) + lines[i].line
+              continue
+            } else {
+              const error = new MismatchedTokenException('Multiline string cannot be dedented', lines[i].prefix, lines[i].newline)
+              this.SAVE_ERROR(error)
+            }
+          }
+
+          lines[i] = lines[i].prefix ? lines[i].prefix.image + lines[i].line : lines[i].line
+        }
+
+        return lines.join('\n')
+      })
     })
 
     /**
@@ -280,13 +300,13 @@ class BaseParser extends EmbeddedActionsParser {
           token.startColumn + start + lines[0].length
         )
         const error = new MismatchedTokenException('Multiline string cannot be dedented', errorToken)
-        throw this.SAVE_ERROR(error)
+        this.SAVE_ERROR(error)
       }
 
       const prefix = lines[lines.length - 1]
       const whitespacePattern = new RegExp('^(' + Tokens.WhiteSpace.PATTERN.source + ')$')
 
-      if (!whitespacePattern.test(prefix)) {
+      if (prefix.length > 0 && !prefix.match(whitespacePattern)) {
         const errorToken = createTokenInstance(
           Tokens.Unicode,
           prefix,
@@ -298,26 +318,33 @@ class BaseParser extends EmbeddedActionsParser {
           prefix.length
         )
         const error = new MismatchedTokenException('Multiline string cannot be dedented', errorToken)
-        throw this.SAVE_ERROR(error)
+        this.SAVE_ERROR(error)
       }
 
-      if (prefix.length > 0) {
-        for (let i = 1; i < lines.length - 1; i++) {
+      for (let i = 1; i < lines.length - 1; i++) {
+        if (lines[i].match(whitespacePattern) || lines[i].length === 0) {
+          lines[i] = ''
+          continue
+        }
+
+        if (prefix) {
           if (lines[i].startsWith(prefix)) {
             lines[i] = lines[i].slice(prefix.length)
           } else {
+            // TODO newline length
+            const startOffset = token.startOffset + start + lines.slice(0, i).join().length + i
             const errorToken = createTokenInstance(
               Tokens.Unicode,
               lines[i],
-              token.startOffset + start + lines.slice(0, i) + i,
-              token.startOffset + start + lines.slice(0, i + 1) + i,
+              startOffset,
+              startOffset + lines[i].length,
               token.startLine + i,
               token.startLine + i,
               0,
               lines[i].length
             )
-            const error = new MismatchedTokenException('Multiline string cannot be dedented', )
-            throw this.SAVE_ERROR(error)
+            const error = new MismatchedTokenException('Multiline string cannot be dedented', errorToken)
+            this.SAVE_ERROR(error)
           }
         }
       }

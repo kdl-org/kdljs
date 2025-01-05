@@ -97,6 +97,7 @@ const CloseQuote = createToken({ name: 'CloseQuote', pattern: /"/, pop_mode: tru
 
 const MultiLineOpenQuote = createToken({ name: 'MultiLineOpenQuote', pattern: /"""/, push_mode: 'multilineString' })
 const MultiLineCloseQuote = createToken({ name: 'MultiLineCloseQuote', pattern: /"""/, pop_mode: true })
+const MultiLineSingleQuote = createToken({ name: 'MultiLineSingleQuote', pattern: /"/ })
 
 // Query language
 const LeftBracket = createToken({ name: 'LeftBracket', pattern: /\[/ })
@@ -151,6 +152,7 @@ module.exports = {
   CloseQuote,
   MultiLineOpenQuote,
   MultiLineCloseQuote,
+  MultiLineSingleQuote,
   LeftBracket,
   RightBracket,
   GreaterThan,
