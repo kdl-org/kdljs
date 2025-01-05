@@ -20,7 +20,7 @@ const BlockComment = createToken({ name: 'BlockComment', pattern: /\/-/ })
 const LineComment = createToken({
   name: 'LineComment',
   // eslint-disable-next-line no-control-regex
-  pattern: /\/\/[^\x00-\x19\x7F\x85\u200E\u200F\u2028-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]*/,
+  pattern: /\/\/[^\x00-\x08\x0A-\x1F\x7F\x85\u200E\u200F\u2028-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]*/,
   line_breaks: true
 })
 const OpenMultiLineComment = createToken({
@@ -42,7 +42,8 @@ const CloseMultiLineComment = createToken({
 // Values
 const Identifier = createToken({
   name: 'Identifier',
-  pattern: /(?![+-]?\.?\d)[\x21\x24-\x27\x2A-\x2E\x30-\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E\x80-\x84\x86-\u200D\u2010-\u2027\u202F-\u2065\u206A-\uD7FF\uE000-\uFEFE\uFF00-\uFFFF]+/
+  // eslint-disable-next-line no-control-regex
+  pattern: /(?![+-]?\.?\d)[^\x00-\x20\x22-\x23\x28-\x29\x2F\x3B\x3D\x5B-\x5D\x7B\x7D\x7F\x85\xA0\u1680\u2000-\u200A\u200E\u200F\u2028-\u202F\u205F\u2066-\u2069\u3000\uD800-\uDFFF\uFEFF]+/
 })
 const Boolean = createToken({ name: 'Boolean', pattern: /#true|#false/ })
 const Null = createToken({ name: 'Null', pattern: /#null/ })
@@ -50,12 +51,12 @@ const FloatKeyword = createToken({ name: 'FloatKeyword', pattern: /#inf|#-inf|#n
 const RawString = createToken({
   name: 'RawString',
   // eslint-disable-next-line no-control-regex
-  pattern: /(#+)"[^\x00-\x08\x0A-\x19\x0E-\x1A\x7F\x85\u200E\u200F\u2028-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]*?"\1/
+  pattern: /(#+)"[^\x00-\x08\x0A-\x1F\x7F\x85\u200E\u200F\u2028-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]*?"\1/
 })
 const MultiLineRawString = createToken({
   name: 'MultiLineRawString',
   // eslint-disable-next-line no-control-regex
-  pattern: /(#+)"""[^\x00-\x08\x0E-\x19\x7F\u200E\u200F\u202A-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]*?"""\1/,
+  pattern: /(#+)"""[^\x00-\x08\x0E-\x1F\x7F\u200E\u200F\u202A-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]*?"""\1/,
   line_breaks: true
 })
 const Float = createToken({
@@ -82,7 +83,7 @@ const OpenQuote = createToken({ name: 'OpenQuote', pattern: /"/, push_mode: 'str
 const Unicode = createToken({
   name: 'Unicode',
   // eslint-disable-next-line no-control-regex
-  pattern: /[^\\"\x00-\x08\x0A-\x19\x0E-\x1A\x7F\x85\u200E\u200F\u2028-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]+/
+  pattern: /[^\\"\x00-\x08\x0A-\x1F\x7F\x85\u200E\u200F\u2028-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]+/
 })
 const Escape = createToken({ name: 'Escape', pattern: /\\[nrt\\"bfs]/ })
 const UnicodeEscape = createToken({ name: 'UnicodeEscape', pattern: /\\u\{([0-9a-fA-F]{1,5}|10[0-9a-fA-F]{4})\}/ })
