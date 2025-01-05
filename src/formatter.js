@@ -16,10 +16,19 @@ const commonEscapes = {
   '\t': '\\t',
   '\\': '\\\\',
   '"': '\\"',
-  '/': '\\/',
   '\x08': '\\b',
   '\x0C': '\\f'
 }
+
+const identifierPattern = /^(?![+-]?\.?\d)[\x21\x24-\x27\x2A-\x2E\x30-\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E\x80-\x84\x86-\u200D\u2010-\u2027\u202F-\u2065\u206A-\uD7FF\uE000-\uFEFE\uFF00-\uFFFF]+$/
+const bannedIdentifiers = new Set([
+  'true',
+  'false',
+  'null',
+  'inf',
+  '-inf',
+  'nan'
+])
 
 /**
  * @access private
@@ -73,6 +82,10 @@ function formatChar (value, options) {
  * @return {string}
  */
 function formatString (value, options) {
+  if (options.preferIdentifierString && identifierPattern.test(value) && !bannedIdentifiers.has(value)) {
+    return value
+  }
+
   return `"${[...value].map(char => formatChar(char, options)).join('')}"`
 }
 
@@ -84,10 +97,31 @@ function formatString (value, options) {
  * @return {string}
  */
 function formatIdentifier (value, options) {
-  if (/^(?![+-]\d)[\x21\x23-\x27\x2A\x2B\x2D\x2E\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF][\x21\x23-\x27\x2A\x2B\x2D\x2E\x30-\x3A\x3F-\x5A\x5E-\x7A\x7C\x7E-\uFFFF]*$/.test(value)) {
-    return value
+  return formatString(value, { ...options, preferIdentifierString: true })
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {number} value
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @return {string}
+ */
+function formatNumber (value, options) {
+  if (!Number.isFinite(value)) {
+    if (value === Number.POSITIVE_INFINITY) {
+      return '#inf'
+    } else if (value === Number.NEGATIVE_INFINITY) {
+      return '#-inf'
+    } else {
+      return '#nan'
+    }
+  }
+
+  if (options.exponentChar === 'E') {
+    return value.toString().toUpperCase()
   } else {
-    return formatString(value, options)
+    return value.toString()
   }
 }
 
@@ -113,10 +147,10 @@ function formatTag (value, options) {
 function formatValue (value, tag, options) {
   if (typeof value === 'string') {
     return formatTag(tag, options) + formatString(value, options)
-  } else if (typeof value === 'number' && options.exponentChar === 'E') {
-    return formatTag(tag, options) + value.toString().toUpperCase()
+  } else if (typeof value === 'number') {
+    return formatTag(tag, options) + formatNumber(value, options)
   } else {
-    return formatTag(tag, options) + value
+    return formatTag(tag, options) + '#' + value
   }
 }
 
@@ -199,6 +233,7 @@ function formatDocument (doc, options, indent) {
  * @property {number} indent
  * @property {string} indentChar
  * @property {string} exponentChar
+ * @property {string} preferIdentifierString
  * @property {boolean} printEmptyChildren
  * @property {boolean} printNullArgs
  * @property {boolean} printNullProps
@@ -222,6 +257,7 @@ function processOptions (options) {
     indent: 4,
     indentChar: ' ',
     exponentChar: 'E',
+    preferIdentifierString: false,
     printEmptyChildren: false,
     printNullArgs: true,
     printNullProps: true,
@@ -243,6 +279,7 @@ function processOptions (options) {
  * @property {number} [indent=4] - The number of characters (from `indentChar`) to indent each level with
  * @property {string} [indentChar=' '] - What character to indent with
  * @property {string} [exponentChar='E'] - What character to use for the exponent in floats (`e` or `E`)
+ * @property {boolean} [preferIdentifierString=false] - Whether to prefer identifier-style strings
  * @property {boolean} [printEmptyChildren=false] - Whether to print empty brackets if a node has no children
  * @property {boolean} [printNullArgs=true] - Whether to print `null` values
  * @property {boolean} [printNullProps=true] - Whether to print properties with value `null`

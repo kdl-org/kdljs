@@ -84,6 +84,7 @@ const KDL4J_OPTIONS = {
   indent: 4,
   indentChar: ' ',
   exponentChar: 'E',
+  preferIdentifierString: true,
   printEmptyChildren: false,
   printNullArgs: true,
   printNullProps: true
