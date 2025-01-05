@@ -226,14 +226,14 @@ function applySelector (selector, doc) {
   for (const nodeFilter of selector) {
     switch (nodeFilter.operator) {
       case '+':
-      case '~':
+      case '++':
         throw new TypeError('Sibling selectors not supported yet.')
 
       case '>':
         nodes = collectImmediateChildren(nodes)
         break
 
-      case undefined:
+      case '>>':
       default:
         nodes = collectChildren(nodes)
         break
