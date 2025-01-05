@@ -20,6 +20,7 @@ const tokens = {
       Tokens.Boolean,
       Tokens.Null,
       Tokens.FloatKeyword,
+      Tokens.MultiLineRawString,
       Tokens.RawString,
       Tokens.Integer,
       Tokens.Float,
@@ -30,6 +31,7 @@ const tokens = {
       Tokens.LeftParenthesis,
       Tokens.RightParenthesis,
       Tokens.EscLine,
+      Tokens.MultiLineOpenQuote,
       Tokens.OpenQuote,
       Tokens.Identifier
     ],
@@ -44,6 +46,15 @@ const tokens = {
       Tokens.UnicodeEscape,
       Tokens.WhiteSpaceEscape,
       Tokens.CloseQuote
+    ],
+    multilineString: [
+      Tokens.NewLine,
+      Tokens.WhiteSpace,
+      Tokens.Unicode,
+      Tokens.Escape,
+      Tokens.UnicodeEscape,
+      Tokens.WhiteSpaceEscape,
+      Tokens.MultiLineCloseQuote
     ]
   }
 }

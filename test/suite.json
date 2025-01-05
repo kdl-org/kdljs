@@ -68,5 +68,11 @@
         }
       }
     }
+  ],
+  "multiline_string": [
+    { "name": "node", "values": ["while (true) {\n  continue\n}"] }
+  ],
+  "multiline_string_raw": [
+    { "name": "node", "values": ["{\n  \"newline\": \"\\n\"\n}"] }
   ]
 }
