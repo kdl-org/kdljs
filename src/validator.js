@@ -8,7 +8,7 @@
  * @param {module:kdljs~Document} doc - KDL document
  * @return {boolean}
  */
-function validateDocument (doc) {
+export function validateDocument (doc) {
   return Array.isArray(doc) && doc.every(node => validateNode(node))
 }
 
@@ -85,5 +85,3 @@ function validateValue (value) {
   const type = typeof value
   return type === 'string' || type === 'number' || type === 'boolean' || value === null
 }
-
-module.exports.validateDocument = validateDocument

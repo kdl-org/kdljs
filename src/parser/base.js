@@ -3,8 +3,8 @@
  * @memberof module:kdljs.parser
  */
 
-const { EmbeddedActionsParser, createTokenInstance, MismatchedTokenException } = require('chevrotain')
-const Tokens = require('./tokens.js')
+import { EmbeddedActionsParser, createTokenInstance, MismatchedTokenException } from 'chevrotain'
+import * as Tokens from './tokens.js'
 
 /**
  * @type Object<string, string>
@@ -471,6 +471,9 @@ class BaseParser extends EmbeddedActionsParser {
   }
 }
 
-module.exports.escapes = escapes
-module.exports.radix = radix
-module.exports.BaseParser = BaseParser
+export {
+  escapes,
+  radix,
+  bannedIdentifiers,
+  BaseParser
+}

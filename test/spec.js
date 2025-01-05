@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 
-const assert = require('assert')
-const path = require('path')
-const fs = require('fs')
-const suite = require('./suite.json')
-const { parse, format } = require('../')
+import assert from 'node:assert'
+import path from 'node:path'
+import url from 'node:url'
+import fs from 'node:fs'
+import { parse, format } from '../src/index.js'
 
 function prepareExpectations (nodes) {
   return nodes.map(node => ({
@@ -20,6 +20,8 @@ function prepareExpectations (nodes) {
   }))
 }
 
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
+const suite = JSON.parse(fs.readFileSync(path.join(__dirname, 'suite.json'), 'utf8'))
 const customTests = path.join(__dirname, './kdl')
 const customTestFile = fs.readdirSync(customTests)
 

@@ -4,7 +4,7 @@
  * @borrows module:kdljs.parser.kdl.parse as parse
  */
 
-const kdl = require('./kdl')
+import * as kdl from './kdl.js'
 
-module.exports.parse = kdl.parse
-module.exports.kdl = kdl
+export const parse = kdl.parse
+export { kdl }
