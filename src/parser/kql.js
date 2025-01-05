@@ -13,13 +13,14 @@ const tokens = {
     main: [
       Tokens.LeftBracket,
       Tokens.RightBracket,
+      Tokens.Descendant,
       Tokens.GreaterOrEqualThan,
       Tokens.LessOrEqualThan,
       Tokens.GreaterThan,
       Tokens.LessThan,
       Tokens.Or,
-      Tokens.AdjacentSibling,
       Tokens.Sibling,
+      Tokens.AdjacentSibling,
       Tokens.NotEquals,
       Tokens.StartsWith,
       Tokens.EndsWith,
@@ -32,22 +33,45 @@ const tokens = {
       Tokens.Comma,
 
       Tokens.WhiteSpace,
+      Tokens.NewLine,
+      Tokens.BlockComment,
+      Tokens.LineComment,
+      Tokens.OpenMultiLineComment,
       Tokens.Boolean,
       Tokens.Null,
+      Tokens.FloatKeyword,
+      Tokens.MultiLineRawString,
       Tokens.RawString,
       Tokens.Integer,
       Tokens.Float,
       Tokens.Equals,
       Tokens.LeftParenthesis,
       Tokens.RightParenthesis,
+      Tokens.EscLine,
+      Tokens.MultiLineOpenQuote,
       Tokens.OpenQuote,
       Tokens.Identifier
+    ],
+    multilineComment: [
+      Tokens.OpenMultiLineComment,
+      Tokens.CloseMultiLineComment,
+      Tokens.MultiLineCommentContent
     ],
     string: [
       Tokens.Unicode,
       Tokens.Escape,
       Tokens.UnicodeEscape,
       Tokens.CloseQuote
+    ],
+    multilineString: [
+      Tokens.MultiLineCloseQuote,
+      Tokens.MultiLineSingleQuote,
+      Tokens.NewLine,
+      Tokens.WhiteSpace,
+      Tokens.Unicode,
+      Tokens.Escape,
+      Tokens.UnicodeEscape,
+      Tokens.WhiteSpaceEscape
     ]
   }
 }
@@ -106,13 +130,10 @@ class KqlParser extends BaseParser {
       ])
 
       this.MANY(() => {
-        const operator = this.OPTION(() => {
-          const operator = this.SUBRULE(this.selectionOperator)
-          this.CONSUME1(Tokens.WhiteSpace)
-          return operator
-        })
-
+        const operator = this.SUBRULE(this.selectionOperator)
+        this.CONSUME1(Tokens.WhiteSpace)
         const nodeFilter = this.SUBRULE1(this.nodeFilter)
+
         selector.push({ ...nodeFilter, operator })
 
         this.OR1([
@@ -261,6 +282,7 @@ class KqlParser extends BaseParser {
      */
     this.RULE('selectionOperator', () => {
       return this.OR([
+        { ALT: () => this.CONSUME(Tokens.Descendant) },
         { ALT: () => this.CONSUME(Tokens.GreaterThan) },
         { ALT: () => this.CONSUME(Tokens.AdjacentSibling) },
         { ALT: () => this.CONSUME(Tokens.Sibling) }

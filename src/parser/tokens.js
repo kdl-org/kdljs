@@ -107,8 +107,9 @@ const LessThan = createToken({ name: 'LessThan', pattern: /</ })
 const GreaterOrEqualThan = createToken({ name: 'GreaterOrEqualThan', pattern: />=/ })
 const LessOrEqualThan = createToken({ name: 'LessOrEqualThan', pattern: /<=/ })
 const Or = createToken({ name: 'Or', pattern: /\|\|/ })
+const Descendant = createToken({ name: 'Descendant', pattern: />>/ })
 const AdjacentSibling = createToken({ name: 'AdjacentSibling', pattern: /\+/ })
-const Sibling = createToken({ name: 'Sibling', pattern: /~/ })
+const Sibling = createToken({ name: 'Sibling', pattern: /\+\+/ })
 const NotEquals = createToken({ name: 'NotEquals', pattern: /!=/ })
 const StartsWith = createToken({ name: 'StartsWith', pattern: /\^=/ })
 const EndsWith = createToken({ name: 'EndsWith', pattern: /\$=/ })
@@ -160,6 +161,7 @@ module.exports = {
   GreaterOrEqualThan,
   LessOrEqualThan,
   Or,
+  Descendant,
   AdjacentSibling,
   Sibling,
   NotEquals,
