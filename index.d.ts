@@ -31,9 +31,9 @@ export type Value = string | number | boolean | null;
  */
 export interface NodeTypeAnnotations {
   /** The type annotation of the Node */
-  name: string;
+  name: string|undefined;
   /** The type annotations of the {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#argument|Arguments} */
-  values: string[];
+  values: Array<string|undefined>;
   /** The type annotations of the {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#property|Properties} */
   properties: Record<string, string>;
 }
@@ -64,6 +64,7 @@ export interface FormattingOptions {
   indent?: number;
   indentChar?: string;
   exponentChar?: string;
+  preferIdentifierString?: boolean;
   printEmptyChildren?: boolean;
   printNullArgs?: boolean;
   printNullProps?: boolean;
