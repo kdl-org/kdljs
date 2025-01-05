@@ -4,6 +4,7 @@
  */
 
 const { validateDocument } = require('./validator.js')
+const { Identifier } = require('./parser/tokens.js')
 
 /* eslint-disable no-control-regex */
 const linespace = /^[\r\n\u0085\u000C\u2028\u2029]$/
@@ -20,7 +21,7 @@ const commonEscapes = {
   '\x0C': '\\f'
 }
 
-const identifierPattern = /^(?![+-]?\.?\d)[\x21\x24-\x27\x2A-\x2E\x30-\x3A\x3C\x3E-\x5A\x5E-\x7A\x7C\x7E\x80-\x84\x86-\u200D\u2010-\u2027\u202F-\u2065\u206A-\uD7FF\uE000-\uFEFE\uFF00-\uFFFF]+$/
+const identifierPattern = new RegExp('^(' + Identifier.PATTERN.source + ')$')
 const bannedIdentifiers = new Set([
   'true',
   'false',
