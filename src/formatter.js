@@ -3,8 +3,9 @@
  * @memberof module:kdljs
  */
 
-const { validateDocument } = require('./validator.js')
-const { Identifier } = require('./parser/tokens.js')
+import { validateDocument } from './validator.js'
+import { Identifier } from './parser/tokens.js'
+import { bannedIdentifiers } from './parser/base.js'
 
 /* eslint-disable no-control-regex */
 const linespace = /^[\r\n\u0085\u000C\u2028\u2029]$/
@@ -22,14 +23,6 @@ const commonEscapes = {
 }
 
 const identifierPattern = new RegExp('^(' + Identifier.PATTERN.source + ')$')
-const bannedIdentifiers = new Set([
-  'true',
-  'false',
-  'null',
-  'inf',
-  '-inf',
-  'nan'
-])
 
 /**
  * @access private
@@ -293,7 +286,7 @@ function processOptions (options) {
  * @param {module:kdljs.formatter.Options} [options={}] - Formatting options
  * @return {string} formatted KDL file
  */
-module.exports.format = function format (doc, options) {
+export function format (doc, options) {
   if (!validateDocument(doc)) {
     throw new TypeError('Invalid KDL document')
   }

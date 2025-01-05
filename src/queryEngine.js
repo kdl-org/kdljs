@@ -3,8 +3,8 @@
  * @memberof module:kdljs
  */
 
-const { parse } = require('./parser/kql.js')
-const { validateDocument } = require('./validator.js')
+import { parse } from './parser/kql.js'
+import { validateDocument } from './validator.js'
 
 /**
  * @typedef Query
@@ -285,7 +285,7 @@ function applyQuery (query, doc) {
  * @param {module:kdljs~QueryString} queryString - Query for selecting and/or transforming results
  * @return {any}
  */
-function query (doc, queryString) {
+export function query (doc, queryString) {
   if (!validateDocument(doc)) {
     throw new TypeError('Invalid KDL document')
   }
@@ -297,5 +297,3 @@ function query (doc, queryString) {
 
   return applyQuery(output, doc)
 }
-
-module.exports.query = query

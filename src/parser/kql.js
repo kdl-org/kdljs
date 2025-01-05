@@ -3,9 +3,9 @@
  * @memberof module:kdljs.parser
  */
 
-const { Lexer } = require('chevrotain')
-const { BaseParser } = require('./base.js')
-const Tokens = require('./tokens.js')
+import { Lexer } from 'chevrotain'
+import { BaseParser } from './base.js'
+import * as Tokens from './tokens.js'
 
 const tokens = {
   defaultMode: 'main',
@@ -361,7 +361,7 @@ const parser = new KqlParser()
  * @param {string} text - Input KQL file (or fragment)
  * @return {module:kdljs.parser.kql.ParseResult} Output
  */
-module.exports.parse = function parse (text) {
+export function parse (text) {
   parser.input = lexer.tokenize(text).tokens
   const output = parser.query()
 
@@ -371,6 +371,8 @@ module.exports.parse = function parse (text) {
   }
 }
 
-module.exports.lexer = lexer
-module.exports.parser = parser
-module.exports.KqlParser = KqlParser
+export {
+  lexer,
+  parser,
+  KqlParser
+}

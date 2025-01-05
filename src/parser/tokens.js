@@ -1,4 +1,4 @@
-const { createToken, EOF } = require('chevrotain')
+import { createToken, EOF } from 'chevrotain'
 
 // Whitespace and comments
 const WhiteSpace = createToken({
@@ -121,7 +121,7 @@ const PropAccessor = createToken({ name: 'PropAccessor', pattern: /prop\(/ })
 const Accessor = createToken({ name: 'Accessor', pattern: /(name|tag|values|props)\(/ })
 const Comma = createToken({ name: 'Comma', pattern: /,/ })
 
-module.exports = {
+export {
   WhiteSpace,
   BOM,
   NewLine,

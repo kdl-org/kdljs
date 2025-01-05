@@ -3,9 +3,9 @@
  * @memberof module:kdljs.parser
  */
 
-const { Lexer, MismatchedTokenException, createTokenInstance } = require('chevrotain')
-const { BaseParser } = require('./base.js')
-const Tokens = require('./tokens.js')
+import { Lexer, MismatchedTokenException, createTokenInstance } from 'chevrotain'
+import { BaseParser } from './base.js'
+import * as Tokens from './tokens.js'
 
 const tokens = {
   defaultMode: 'main',
@@ -341,7 +341,7 @@ const parser = new KdlParser()
  * @param {string} text - Input KDL file (or fragment)
  * @return {module:kdljs.parser.kdl.ParseResult} Output
  */
-module.exports.parse = function parse (text) {
+export function parse (text) {
   const { tokens, errors } = lexer.tokenize(text)
 
   if (errors.length) {
@@ -360,6 +360,8 @@ module.exports.parse = function parse (text) {
   }
 }
 
-module.exports.lexer = lexer
-module.exports.parser = parser
-module.exports.KdlParser = KdlParser
+export {
+  lexer,
+  parser,
+  KdlParser
+}

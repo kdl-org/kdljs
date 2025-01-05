@@ -6,10 +6,10 @@
  * @borrows module:kdljs.validator.validateDocument as validateDocument
  */
 
-const { parse } = require('./parser/index.js')
-const { format } = require('./formatter.js')
-const { query } = require('./queryEngine.js')
-const { validateDocument } = require('./validator.js')
+import { parse } from './parser/index.js'
+import { format } from './formatter.js'
+import { query } from './queryEngine.js'
+import { validateDocument } from './validator.js'
 
 /**
  * A {@link https://github.com/kdl-org/kdl/blob/main/SPEC.md#document|Document}.
@@ -53,7 +53,9 @@ const { validateDocument } = require('./validator.js')
  * @type {string}
  */
 
-module.exports.parse = parse
-module.exports.format = format
-module.exports.query = query
-module.exports.validateDocument = validateDocument
+export {
+  parse,
+  format,
+  query,
+  validateDocument
+}
