@@ -54,7 +54,7 @@ smile "😁"
 parse(`
 // Instead of anonymous nodes, nodes and properties can be wrapped
 // in "" for arbitrary node names.
-"!@#$@$%Q#$%~@!40" "1.2.3" "!!!!!"=true
+"!@#$@$%Q#$%~@!40" "1.2.3" "!!!!!"=#true
 `)
 
 // [
@@ -73,15 +73,15 @@ parse(`
 
 parse(`
 // The following is a legal bare identifier:
-foo123~!@#$%^&*.:'|/?+ "weeee"
+foo123~!@$%^&*.:'|?+ "weeee"
 
 // And you can also use unicode!
-ノード お名前＝"☜(ﾟヮﾟ☜)"
+ノード お名前="☜(ﾟヮﾟ☜)"
 `)
 
 // [
 //   {
-//     name: "foo123~!@#$%^&*.:'|/?+",
+//     name: "foo123~!@$%^&*.:'|?+",
 //     properties: {},
 //     values: [ 'weeee' ],
 //     children: [],
@@ -107,7 +107,7 @@ foo123~!@#$%^&*.:'|/?+ "weeee"
 parse(`
 // kdl specifically allows properties and values to be
 // interspersed with each other, much like CLI commands.
-foo bar=true "baz" quux=false 1 2 3
+foo bar=#true "baz" quux=#false 1 2 3
 `)
 
 // [
@@ -131,6 +131,7 @@ package {
   (author)person contact=(email)"example@example.org"
   (contributor)person homepage=(url)"https://example.org/example"
 }
+`)
 
 // [
 //   {
@@ -160,10 +161,10 @@ package {
 //           values: []
 //         }
 //       }
-//     ]
+//     ],
+//     tags: { name: undefined, properties: {}, values: [] }
 //   }
 // ]
-`)
 ```
 
 ### Querying
@@ -178,12 +179,12 @@ const { output: document } = parse(`package {
         winapi "1.0.0" path="./crates/my-winapi-fork"
     }
     dependencies {
-        miette "2.0.0" dev=true
+        miette "2.0.0" dev=#true
     }
 }`)
 
-query(document, 'package name') // or
-query(document, 'top() > package name')
+query(document, 'package >> name') // or
+query(document, 'top() > package >> name')
 
 // [
 //   {
@@ -238,7 +239,7 @@ query(document, 'dependencies > []')
 // MAP OPERATOR
 // ============
 
-query(document, 'package name => val()')
+query(document, 'package >> name => val()')
 // ['foo'].
 
 query(document, 'dependencies[platform] => platform')
