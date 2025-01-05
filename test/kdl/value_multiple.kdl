@@ -1,0 +1,7 @@
+node "foo" "bar"
+
+node """
+foo
+""" """
+bar
+"""

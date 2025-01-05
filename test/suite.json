@@ -74,5 +74,9 @@
   ],
   "multiline_string_raw": [
     { "name": "node", "values": ["{\n  \"newline\": \"\\n\"\n}"] }
+  ],
+  "value_multiple": [
+    { "name": "node", "values": ["foo", "bar"] },
+    { "name": "node", "values": ["foo", "bar"] }
   ]
 }
