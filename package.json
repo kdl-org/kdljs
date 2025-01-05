@@ -9,7 +9,7 @@
     "lint": "standard",
     "test": "mocha --throw-deprecation test/spec.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
-    "docs": "jsdoc -c .jsdoc.cjs",
+    "docs": "node scripts/update-jsdoc-config.js && jsdoc -c .jsdoc.json",
     "preversion": "npm run lint && npm test",
     "version": "npm run changelog"
   },
