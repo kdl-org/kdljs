@@ -122,6 +122,9 @@
 # [0.1.0-rc.0](https://github.com/kdl-org/kdljs/compare/v0.0.3...v0.1.0-rc.0) (2021-08-31)
 
 
+* feat(formatter)!: support KDL serialization ([4c4c94e](https://github.com/kdl-org/kdljs/commit/4c4c94edb14c2867f539288033f0edca97a15410))
+
+
 ### Bug Fixes
 
 * **parser:** allow raw strings as identifiers ([8cea257](https://github.com/kdl-org/kdljs/commit/8cea257261caaf9313303b2f2b1bf0e166ece08b))
@@ -129,9 +132,6 @@
 * **parser:** fix edge cases in node-space behavior ([441c967](https://github.com/kdl-org/kdljs/commit/441c9674ddf4acce7d5378d07ec1e0022e2c5805))
 * **parser:** parse nodes with only node-space ([de00d21](https://github.com/kdl-org/kdljs/commit/de00d215cc04fe43ec98c0492b8a1e89da847e77))
 * **ts:** update types ([3049abe](https://github.com/kdl-org/kdljs/commit/3049abe46343cea4f2c091ef9426573d75771668))
-
-
-* feat(formatter)!: support KDL serialization ([4c4c94e](https://github.com/kdl-org/kdljs/commit/4c4c94edb14c2867f539288033f0edca97a15410))
 
 
 ### Features
