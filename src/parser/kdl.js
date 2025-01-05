@@ -60,6 +60,7 @@ const tokens = {
 }
 
 const nodeEndTokens = new Set([
+  Tokens.RightBrace,
   Tokens.LineComment,
   Tokens.NewLine,
   Tokens.SemiColon,
