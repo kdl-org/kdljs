@@ -3,7 +3,7 @@
  * @memberof module:kdljs.parser
  */
 
-const { EmbeddedActionsParser, MismatchedTokenException } = require('chevrotain')
+const { EmbeddedActionsParser, createTokenInstance, MismatchedTokenException } = require('chevrotain')
 const Tokens = require('./tokens.js')
 
 /**
@@ -126,7 +126,9 @@ class BaseParser extends EmbeddedActionsParser {
       return this.OR([
         { ALT: () => this.SUBRULE(this.identifierString) },
         { ALT: () => this.SUBRULE(this.quotedString) },
-        { ALT: () => this.SUBRULE(this.rawString) }
+        { ALT: () => this.SUBRULE(this.multilineString) },
+        { ALT: () => this.SUBRULE(this.rawString) },
+        { ALT: () => this.SUBRULE(this.multilineRawString) }
       ])
     })
 
@@ -177,15 +179,150 @@ class BaseParser extends EmbeddedActionsParser {
     })
 
     /**
+     * Consume a multiline string
+     * @method #multilineString
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {string}
+     */
+    this.RULE('multilineString', () => {
+      const lines = []
+
+      this.CONSUME(Tokens.MultiLineOpenQuote)
+      let previousToken = this.CONSUME(Tokens.NewLine)
+      this.MANY(() => {
+        const prefix = this.OPTION(() => this.CONSUME(Tokens.WhiteSpace))
+
+        let line = ''
+        this.MANY2(() => {
+          line += this.OR([
+            { ALT: () => this.CONSUME1(Tokens.WhiteSpace).image },
+            { ALT: () => this.CONSUME(Tokens.Unicode).image },
+            { ALT: () => escapes[this.CONSUME(Tokens.Escape).image] },
+            { ALT: () => this.SUBRULE(this.unicodeEscape) },
+            {
+              ALT: () => {
+                this.CONSUME(Tokens.WhiteSpaceEscape)
+                return ''
+              }
+            }
+          ])
+        })
+        lines.push({ previousToken, prefix, line })
+        previousToken = this.CONSUME1(Tokens.NewLine)
+      })
+
+      const prefix = this.OPTION1(() => this.CONSUME2(Tokens.WhiteSpace).image) ?? ''
+      this.CONSUME(Tokens.MultiLineCloseQuote)
+
+      if (prefix.length > 0) {
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].prefix && lines[i].prefix.image.startsWith(prefix)) {
+            lines[i] = lines[i].prefix.image.slice(prefix.length) + lines[i].line
+          } else {
+            const error = new MismatchedTokenException('Multiline string cannot be dedented', lines[i].prefix, lines[i].previousToken)
+            throw this.SAVE_ERROR(error)
+          }
+        }
+      }
+
+      return lines.join('\n')
+    })
+
+    /**
      * Consume a raw string
      * @method #rawString
      * @memberof module:kdljs.parser.base.BaseParser
      * @return {string}
      */
     this.RULE('rawString', () => {
-      const string = this.CONSUME(Tokens.RawString).image
-      const start = string.indexOf('"')
-      return string.slice(start + 1, -start)
+      const previousToken = this.LA(0)
+      const token = this.CONSUME(Tokens.RawString)
+      const string = token.image
+
+      // Incorrect raw multiline string is lexed as a simple raw string
+      if (string === '#"""#') {
+        const error = new MismatchedTokenException('Multiline string cannot be dedented', token, previousToken)
+        throw this.SAVE_ERROR(error)
+      }
+
+      const start = string.indexOf('"') + 1
+      return string.slice(start, -start)
+    })
+
+    /**
+     * Consume a multiline raw string
+     * @method #multilineRawString
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {string}
+     */
+    this.RULE('multilineRawString', () => {
+      const token = this.CONSUME(Tokens.MultiLineRawString)
+      const string = token.image
+      const start = string.indexOf('"""') + 3
+      const contents = string.slice(start, -start)
+
+      if (this.RECORDING_PHASE) {
+        return contents
+      }
+
+      const newlinePattern = new RegExp(Tokens.NewLine.PATTERN.source, 'g')
+      const lines = contents.split(newlinePattern)
+
+      if (lines[0] !== '') {
+        const errorToken = createTokenInstance(
+          Tokens.Unicode,
+          lines[0],
+          token.startOffset + start,
+          token.startOffset + start + lines[0].length,
+          token.startLine,
+          token.startLine,
+          token.startColumn + start,
+          token.startColumn + start + lines[0].length
+        )
+        const error = new MismatchedTokenException('Multiline string cannot be dedented', errorToken)
+        throw this.SAVE_ERROR(error)
+      }
+
+      const prefix = lines[lines.length - 1]
+      const whitespacePattern = new RegExp('^(' + Tokens.WhiteSpace.PATTERN.source + ')$')
+
+      if (!whitespacePattern.test(prefix)) {
+        const errorToken = createTokenInstance(
+          Tokens.Unicode,
+          prefix,
+          token.endOffset - start - prefix.length,
+          token.endOffset - start,
+          token.endLine,
+          token.endLine,
+          0,
+          prefix.length
+        )
+        const error = new MismatchedTokenException('Multiline string cannot be dedented', errorToken)
+        throw this.SAVE_ERROR(error)
+      }
+
+      if (prefix.length > 0) {
+        for (let i = 1; i < lines.length - 1; i++) {
+          if (lines[i].startsWith(prefix)) {
+            lines[i] = lines[i].slice(prefix.length)
+          } else {
+            const errorToken = createTokenInstance(
+              Tokens.Unicode,
+              lines[i],
+              token.startOffset + start + lines.slice(0, i) + i,
+              token.startOffset + start + lines.slice(0, i + 1) + i,
+              token.startLine + i,
+              token.startLine + i,
+              0,
+              lines[i].length
+            )
+            const error = new MismatchedTokenException('Multiline string cannot be dedented', )
+            throw this.SAVE_ERROR(error)
+          }
+        }
+      }
+
+      return lines.slice(1, -1).join('\n')
     })
 
     /**

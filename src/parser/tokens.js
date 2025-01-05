@@ -50,7 +50,12 @@ const FloatKeyword = createToken({ name: 'FloatKeyword', pattern: /#inf|#-inf|#n
 const RawString = createToken({
   name: 'RawString',
   // eslint-disable-next-line no-control-regex
-  pattern: /(#+)"[^\x00-\x08\x0E-\x19\x7F\u200E\u200F\u202A-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]*?"\1/,
+  pattern: /(#+)"[^\x00-\x08\x0A-\x19\x0E-\x1A\x7F\x85\u200E\u200F\u2028-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]*?"\1/
+})
+const MultiLineRawString = createToken({
+  name: 'MultiLineRawString',
+  // eslint-disable-next-line no-control-regex
+  pattern: /(#+)"""[^\x00-\x08\x0E-\x19\x7F\u200E\u200F\u202A-\u202E\u2066-\u2069\uD800-\uDFFF\uFEFF]*?"""\1/,
   line_breaks: true
 })
 const Float = createToken({
@@ -89,6 +94,9 @@ const WhiteSpaceEscape = createToken({
 })
 const CloseQuote = createToken({ name: 'CloseQuote', pattern: /"/, pop_mode: true })
 
+const MultiLineOpenQuote = createToken({ name: 'MultiLineOpenQuote', pattern: /"""/, push_mode: 'multilineString' })
+const MultiLineCloseQuote = createToken({ name: 'MultiLineCloseQuote', pattern: /"""/, pop_mode: true })
+
 // Query language
 const LeftBracket = createToken({ name: 'LeftBracket', pattern: /\[/ })
 const RightBracket = createToken({ name: 'RightBracket', pattern: /\]/ })
@@ -120,6 +128,7 @@ module.exports = {
   Null,
   FloatKeyword,
   RawString,
+  MultiLineRawString,
   Integer,
   Float,
   SemiColon,
@@ -139,6 +148,8 @@ module.exports = {
   UnicodeEscape,
   WhiteSpaceEscape,
   CloseQuote,
+  MultiLineOpenQuote,
+  MultiLineCloseQuote,
   LeftBracket,
   RightBracket,
   GreaterThan,
