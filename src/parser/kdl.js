@@ -59,6 +59,13 @@ const tokens = {
   }
 }
 
+const nodeEndTokens = new Set([
+  Tokens.LineComment,
+  Tokens.NewLine,
+  Tokens.SemiColon,
+  Tokens.EOF
+])
+
 /**
  * @class
  * @extends module:kdljs.parser.base.BaseParser
@@ -112,86 +119,93 @@ class KdlParser extends BaseParser {
      * @return {module:kdljs~Node}
      */
     this.RULE('node', () => {
-      const tags = {
-        name: this.OPTION(() => {
-          const tag = this.SUBRULE(this.tag)
-          this.OPTION1(() => this.SUBRULE(this.nodeSpace))
-          return tag
-        }),
+      const node = {
+        name: undefined,
         properties: {},
-        values: []
+        values: [],
+        children: [],
+        tags: {
+          name: undefined,
+          properties: {},
+          values: []
+        }
       }
-      const name = this.SUBRULE(this.string)
-      const properties = {}
-      const values = []
 
-      this.MANY(() => {
-        this.SUBRULE1(this.nodeSpace)
+      this.OPTION(() => {
+        node.tags.name = this.SUBRULE(this.tag)
+        this.OPTION1(() => this.SUBRULE(this.nodeSpace))
+      })
 
-        const commented = this.OPTION2(() => {
-          this.CONSUME(Tokens.BlockComment)
-          this.OPTION3(() => this.SUBRULE(this.lineSpace))
-          return true
-        })
+      node.name = this.SUBRULE(this.string)
 
-        this.OR1([
-          {
-            GATE: this.BACKTRACK(this.property),
-            ALT: () => {
-              const parts = this.SUBRULE(this.property)
-              if (!commented) {
-                properties[parts[0]] = parts[1]
-                tags.properties[parts[0]] = parts[2]
+      let entriesEnded = false
+      let childrenEnded = false
+
+      this.MANY({
+        GATE: () => !nodeEndTokens.has(this.LA(1).tokenType),
+        DEF: () => {
+          this.SUBRULE1(this.nodeSpace)
+
+          this.OR([
+            {
+              GATE: () => !entriesEnded && this.BACKTRACK(this.property).call(this),
+              ALT: () => {
+                const parts = this.SUBRULE(this.property)
+                node.properties[parts[0]] = parts[1]
+                node.tags.properties[parts[0]] = parts[2]
               }
-            }
-          },
-          {
-            GATE: this.BACKTRACK(this.taggedValue),
-            ALT: () => {
-              const parts = this.SUBRULE(this.taggedValue)
-              if (!commented) {
-                values.push(parts[0])
-                tags.values.push(parts[1])
+            },
+            {
+              GATE: () => !entriesEnded && this.BACKTRACK(this.argument).call(this),
+              ALT: () => {
+                const parts = this.SUBRULE(this.argument)
+                node.values.push(parts[0])
+                node.tags.values.push(parts[1])
               }
+            },
+            {
+              GATE: () => !childrenEnded,
+              ALT: () => {
+                node.children = this.SUBRULE(this.nodeChildren)
+                entriesEnded = true
+                childrenEnded = true
+              }
+            },
+            {
+              ALT: () => {
+                this.CONSUME(Tokens.BlockComment)
+                this.OPTION2(() => this.SUBRULE(this.lineSpace))
+                this.OR1([
+                  {
+                    GATE: () => !entriesEnded && this.BACKTRACK(this.property).call(this),
+                    ALT: () => this.SUBRULE1(this.property)
+                  },
+                  {
+                    GATE: () => !entriesEnded && this.BACKTRACK(this.argument).call(this),
+                    ALT: () => this.SUBRULE1(this.argument)
+                  },
+                  {
+                    ALT: () => {
+                      this.SUBRULE1(this.nodeChildren)
+                      entriesEnded = true
+                    }
+                  }
+                ])
+              }
+            },
+            {
+              GATE: () => nodeEndTokens.has(this.LA(1).tokenType),
+              ALT: () => {}
             }
-          }
-        ])
+          ])
+        }
       })
-
-      this.MANY1(() => {
-        this.SUBRULE2(this.nodeSpace)
-        this.SUBRULE(this.nodeChildrenSlashdash)
-      })
-
-      const children = this.OPTION4(() => {
-        this.SUBRULE3(this.nodeSpace)
-        const children = this.SUBRULE(this.nodeChildren)
-        return children
-      }) ?? []
-
-      this.MANY2(() => {
-        this.SUBRULE4(this.nodeSpace)
-        this.SUBRULE1(this.nodeChildrenSlashdash)
-      })
-
-      this.OPTION5(() => this.SUBRULE5(this.nodeSpace))
 
       if (this.LA(1).tokenType !== Tokens.RightBrace) {
         this.SUBRULE(this.nodeTerminator)
       }
 
-      return { name, properties, values, children, tags }
-    })
-
-    /**
-     * Consume slashdashed node children
-     * @method #nodeChildrenSlashdash
-     * @memberof module:kdljs.parser.kdl.KdlParser
-     */
-    this.RULE('nodeChildrenSlashdash', () => {
-      this.CONSUME(Tokens.BlockComment)
-      this.OPTION(() => this.SUBRULE(this.lineSpace))
-      this.SUBRULE(this.nodeChildren)
+      return node
     })
 
     /**
@@ -205,17 +219,17 @@ class KdlParser extends BaseParser {
       this.OPTION(() => this.SUBRULE(this.nodeSpace))
       this.CONSUME(Tokens.Equals)
       this.OPTION1(() => this.SUBRULE1(this.nodeSpace))
-      const parts = this.SUBRULE(this.taggedValue)
+      const parts = this.SUBRULE(this.argument)
       return [key, parts[0], parts[1]]
     })
 
     /**
-     * Consume a tagged value
-     * @method #taggedValue
+     * Consume an argument
+     * @method #argument
      * @memberof module:kdljs.parser.kdl.KdlParser
      * @return {[module:kdljs~Value, string]} value-type tuple
      */
-    this.RULE('taggedValue', () => {
+    this.RULE('argument', () => {
       const tag = this.OPTION(() => {
         const tag = this.SUBRULE(this.tag)
         this.OPTION1(() => this.SUBRULE(this.nodeSpace))
