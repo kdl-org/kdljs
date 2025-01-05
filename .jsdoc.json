@@ -1,0 +1,28 @@
+{
+  "plugins": ["plugins/markdown"],
+  "markdown": {
+    "idInHeadings": true
+  },
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "source": {
+    "include": [
+      "src",
+      "src/parser"
+    ]
+  },
+  "opts": {
+    "destination": "./docs/0.2/",
+    "encoding": "utf8",
+    "readme": "./README.md"
+  },
+  "templates": {
+    "default": {
+      "includeDate": true
+    },
+    "cleverLinks": false,
+    "monospaceLinks": false
+  }
+}
