@@ -1,3 +1,55 @@
+# [0.3.0](https://github.com/kdl-org/kdljs/compare/v0.2.0...v0.3.0) (2025-01-08)
+
+
+### Bug Fixes
+
+* **formatter:** update to KDL 2.0 ([e2b73c5](https://github.com/kdl-org/kdljs/commit/e2b73c5d733b3aa5acb6be64d7145d45cdd10af0))
+* **parser:** add vertical tab (0x0B) as newline ([cdccd9f](https://github.com/kdl-org/kdljs/commit/cdccd9faf18e8f9d2c98d926c3b597338ef2f91b))
+* **parser:** add whitespace escapes to quoted strings ([d04352c](https://github.com/kdl-org/kdljs/commit/d04352c67586fb8122c56969c368923e35d1488c))
+* **parser:** allow bare identifier strings ([d531b07](https://github.com/kdl-org/kdljs/commit/d531b07eb52f8a7d9f4f9ae738be260ccd54c1c8))
+* **parser:** disallow banned identifier values ([a867a74](https://github.com/kdl-org/kdljs/commit/a867a746256343ccdbfbfe781f736d2a090a6581))
+* **parser:** disallow escaped unicode scalar values ([401e612](https://github.com/kdl-org/kdljs/commit/401e612c87c841e1667a08ee181fd52def145b00))
+* **parser:** disallow more literal code points ([c099947](https://github.com/kdl-org/kdljs/commit/c099947a9dee329aa5c465c9fb0b66a43adc9573))
+* **parser:** disallow more numeric-like bare identifiers ([8ba3e15](https://github.com/kdl-org/kdljs/commit/8ba3e1542cca8ee78fef5cac92a9d6bf1d7bcdd8))
+* **parser:** disallow some literal code points ([5256331](https://github.com/kdl-org/kdljs/commit/5256331883371a4ba4d973cfd2dc1e8d8debe385))
+* **parser:** fix disallowed code point regexes ([2cf1c39](https://github.com/kdl-org/kdljs/commit/2cf1c3939b8358625885cca6fbb702abbcea2c98))
+* **parser:** fix escline behavior ([89e0585](https://github.com/kdl-org/kdljs/commit/89e0585f6842f13e5dbd9a23580ee9fefea91b59))
+* **parser:** fix handling of surrogate pairs ([e191c69](https://github.com/kdl-org/kdljs/commit/e191c695a5097bdbe17db6224fb092b1dcdd1910))
+* **parser:** fix parsing of multiline strings ([fcddb84](https://github.com/kdl-org/kdljs/commit/fcddb8461002002c927782f26ae4dd96ed3efe30))
+* **parser:** fix slashdash behavior ([f033654](https://github.com/kdl-org/kdljs/commit/f0336548f3879bb3203d3e547a9e92af771faa45))
+* **parser:** fix slashdash behavior ([622fbd8](https://github.com/kdl-org/kdljs/commit/622fbd8802b3fb628a7d47aa3efc2be2c0ffc0be))
+* **parser:** fix unterminated nodes at the end of children blocks ([48b4307](https://github.com/kdl-org/kdljs/commit/48b430789ccdddff0b3eb425d6950e7de11d7eec))
+* **parser:** implement bare identifier strings ([846f7c0](https://github.com/kdl-org/kdljs/commit/846f7c0cfea8c2bc82d22ed59b314dbc1d6137d0))
+* **parser:** implement float keywords ([7250cd1](https://github.com/kdl-org/kdljs/commit/7250cd130823d171bc5788f0cd63e81cec4486e7))
+* **parser:** implement multiline strings ([127f9a2](https://github.com/kdl-org/kdljs/commit/127f9a20a48ec6de927c450aae857225a1688f37))
+* **parser:** only allow U+FEFF at start of file ([e1e3769](https://github.com/kdl-org/kdljs/commit/e1e37691961757e9b8553388eb663c73d9e1d83f))
+* **parser:** remove '#' as identifier character ([c632bd1](https://github.com/kdl-org/kdljs/commit/c632bd15ede0d7578f0081c7d0d2513a3ad71eb2))
+* **parser:** remove raw string prefix ([a4ffec2](https://github.com/kdl-org/kdljs/commit/a4ffec2c8528e42198f427f58d3a8091e2b54ab1))
+* **parser:** un-reserve ",", "<", and ">" from identifier strings ([375d8b8](https://github.com/kdl-org/kdljs/commit/375d8b834ca9fff31df47d17f78ce54a36679f5e))
+* **parser:** update boolean/null literals ([a0ccaee](https://github.com/kdl-org/kdljs/commit/a0ccaee98f77fb93a156bed3901077421ccab587))
+* **parser:** update escaped characters for quoted strings ([89eb557](https://github.com/kdl-org/kdljs/commit/89eb5576e328a3ee1bdcee6793464fd734f0c975))
+* **parser:** update optional whitespace limitations ([7d12d1d](https://github.com/kdl-org/kdljs/commit/7d12d1d07528fa3f85997729337d39053f4a5d0c))
+* **query:** update KQL to 2.0 ([719f966](https://github.com/kdl-org/kdljs/commit/719f96682ace97a3b3570daaa690e5611cc78029))
+* **types:** update to KDL 2.0 ([3712172](https://github.com/kdl-org/kdljs/commit/3712172731a87dd4646afd6e1f0c99eeb30d13cf))
+
+
+### chore
+
+* bump development dependencies ([f07cc25](https://github.com/kdl-org/kdljs/commit/f07cc25bd35218bdd7194b0be6e19f5a07c4815d))
+
+
+### Code Refactoring
+
+* change to ESM ([974b2b2](https://github.com/kdl-org/kdljs/commit/974b2b25a7c22ebdd3647c923c596a6e039274f1))
+
+
+### BREAKING CHANGES
+
+* This library is now ESM-only.
+* Drop support for Node.js v16
+
+
+
 # [0.2.0](https://github.com/kdl-org/kdljs/compare/v0.1.5...v0.2.0) (2023-10-16)
 
 
