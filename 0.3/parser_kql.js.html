@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: parser/kql.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: parser/kql.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @namespace kql
+ * @memberof module:kdljs.parser
+ */
+
+import { Lexer } from 'chevrotain'
+import { BaseParser } from './base.js'
+import * as Tokens from './tokens.js'
+
+const tokens = {
+  defaultMode: 'main',
+  modes: {
+    main: [
+      Tokens.LeftBracket,
+      Tokens.RightBracket,
+      Tokens.Descendant,
+      Tokens.GreaterOrEqualThan,
+      Tokens.LessOrEqualThan,
+      Tokens.GreaterThan,
+      Tokens.LessThan,
+      Tokens.Or,
+      Tokens.Sibling,
+      Tokens.AdjacentSibling,
+      Tokens.NotEquals,
+      Tokens.StartsWith,
+      Tokens.EndsWith,
+      Tokens.Contains,
+      Tokens.Map,
+      Tokens.TopAccessor,
+      Tokens.ValAccessor,
+      Tokens.PropAccessor,
+      Tokens.Accessor,
+      Tokens.Comma,
+
+      Tokens.WhiteSpace,
+      Tokens.NewLine,
+      Tokens.BlockComment,
+      Tokens.LineComment,
+      Tokens.OpenMultiLineComment,
+      Tokens.Boolean,
+      Tokens.Null,
+      Tokens.FloatKeyword,
+      Tokens.MultiLineRawString,
+      Tokens.RawString,
+      Tokens.Integer,
+      Tokens.Float,
+      Tokens.Equals,
+      Tokens.LeftParenthesis,
+      Tokens.RightParenthesis,
+      Tokens.EscLine,
+      Tokens.MultiLineOpenQuote,
+      Tokens.OpenQuote,
+      Tokens.Identifier
+    ],
+    multilineComment: [
+      Tokens.OpenMultiLineComment,
+      Tokens.CloseMultiLineComment,
+      Tokens.MultiLineCommentContent
+    ],
+    string: [
+      Tokens.Unicode,
+      Tokens.Escape,
+      Tokens.UnicodeEscape,
+      Tokens.CloseQuote
+    ],
+    multilineString: [
+      Tokens.MultiLineCloseQuote,
+      Tokens.MultiLineSingleQuote,
+      Tokens.NewLine,
+      Tokens.WhiteSpace,
+      Tokens.Unicode,
+      Tokens.Escape,
+      Tokens.UnicodeEscape,
+      Tokens.WhiteSpaceEscape
+    ]
+  }
+}
+
+/**
+ * @class
+ * @extends module:kdljs.parser.base.BaseParser
+ * @memberof module:kdljs.parser.kql
+ */
+class KqlParser extends BaseParser {
+  constructor () {
+    super(tokens)
+
+    /**
+     * Consume a query
+     * @method #query
+     * @memberof module:kdljs.parser.kql.KqlParser
+     * @return {module:kdljs.query.Query}
+     */
+    this.RULE('query', () => {
+      const alternatives = [this.SUBRULE(this.selector)]
+
+      this.MANY(() => {
+        this.CONSUME(Tokens.Or)
+        this.CONSUME1(Tokens.WhiteSpace)
+
+        const selector = this.SUBRULE1(this.selector)
+        alternatives.push(selector)
+      })
+
+      const mapping = this.OPTION(() => {
+        this.CONSUME(Tokens.Map)
+        this.CONSUME2(Tokens.WhiteSpace)
+        return this.SUBRULE(this.mapTuple)
+      })
+
+      this.CONSUME(Tokens.EOF)
+
+      return {
+        alternatives,
+        mapping
+      }
+    })
+
+    /**
+     * Consume a selector
+     * @method #selector
+     * @memberof module:kdljs.parser.kql.KqlParser
+     * @return {module:kdljs.query.Selector}
+     */
+    this.RULE('selector', () => {
+      const selector = [this.SUBRULE(this.nodeFilter)]
+      this.OR([
+        { ALT: () => this.CONSUME(Tokens.WhiteSpace) },
+        { ALT: () => this.CONSUME(Tokens.EOF) }
+      ])
+
+      this.MANY(() => {
+        const operator = this.SUBRULE(this.selectionOperator)
+        this.CONSUME1(Tokens.WhiteSpace)
+        const nodeFilter = this.SUBRULE1(this.nodeFilter)
+
+        selector.push({ ...nodeFilter, operator })
+
+        this.OR1([
+          { ALT: () => this.CONSUME2(Tokens.WhiteSpace) },
+          { ALT: () => this.CONSUME1(Tokens.EOF) }
+        ])
+      })
+
+      return selector
+    })
+
+    /**
+     * Consume a nodeFilter
+     * @method #nodeFilter
+     * @memberof module:kdljs.parser.kql.KqlParser
+     * @return {module:kdljs.query.NodeFilter}
+     */
+    this.RULE('nodeFilter', () => {
+      const matchers = []
+      this.AT_LEAST_ONE(() => {
+        matchers.push(this.SUBRULE(this.matcher))
+      })
+      return { matchers }
+    })
+
+    /**
+     * Consume a matcher
+     * @method #matcher
+     * @memberof module:kdljs.parser.kql.KqlParser
+     * @return {module:kdljs.query.Matcher}
+     */
+    this.RULE('matcher', () => {
+      return this.OR([
+        {
+          ALT: () => ({
+            accessor: { type: 'name' },
+            operator: '=',
+            value: this.SUBRULE(this.string)
+          })
+        },
+        {
+          ALT: () => {
+            this.CONSUME(Tokens.TopAccessor)
+            this.CONSUME(Tokens.RightParenthesis)
+            return { accessor: { type: 'top' } }
+          }
+        },
+        {
+          ALT: () => {
+            this.CONSUME1(Tokens.LeftParenthesis)
+            this.CONSUME1(Tokens.RightParenthesis)
+            return { accessor: { type: 'tag' } }
+          }
+        },
+        {
+          ALT: () => ({
+            accessor: { type: 'name' },
+            operator: '=',
+            tag: this.SUBRULE(this.tag)
+          })
+        },
+        { ALT: () => this.SUBRULE(this.accessorMatcher) }
+      ])
+    })
+
+    /**
+     * Consume a [accessor]-type matcher
+     * @method #accessorMatcher
+     * @memberof module:kdljs.parser.kql.KqlParser
+     * @return {module:kdljs.query.Matcher}
+     */
+    this.RULE('accessorMatcher', () => {
+      this.CONSUME(Tokens.LeftBracket)
+      const matcher = this.OPTION(() => {
+        const accessor = this.SUBRULE(this.accessor)
+        const matcher = this.OPTION1(() => {
+          this.CONSUME(Tokens.WhiteSpace)
+          const operator = this.SUBRULE(this.matcherOperator)
+          this.CONSUME1(Tokens.WhiteSpace)
+
+          const matcher = { accessor, operator }
+
+          this.OR([
+            { ALT: () => { matcher.value = this.SUBRULE(this.value) } },
+            { ALT: () => { matcher.tag = this.SUBRULE(this.tag) } }
+          ])
+
+          return matcher
+        })
+
+        return matcher || { accessor }
+      })
+      this.CONSUME(Tokens.RightBracket)
+
+      return matcher || {}
+    })
+
+    /**
+     * Consume an accessor
+     * @method #accessor
+     * @memberof module:kdljs.parser.kql.KqlParser
+     * @return {module:kdljs.query.Accessor}
+     */
+    this.RULE('accessor', () => {
+      return this.OR([
+        {
+          ALT: () => {
+            this.CONSUME(Tokens.ValAccessor)
+            const parameter = this.OPTION(() => this.SUBRULE(this.value))
+            this.CONSUME(Tokens.RightParenthesis)
+
+            return { type: 'val', parameter }
+          }
+        },
+        {
+          ALT: () => {
+            this.CONSUME(Tokens.PropAccessor)
+            const parameter = this.SUBRULE(this.string)
+            this.CONSUME1(Tokens.RightParenthesis)
+
+            return { type: 'prop', parameter }
+          }
+        },
+        {
+          ALT: () => {
+            const type = this.CONSUME(Tokens.Accessor).image.slice(0, -1)
+            this.CONSUME2(Tokens.RightParenthesis)
+
+            return { type }
+          }
+        },
+        {
+          ALT: () => {
+            const parameter = this.SUBRULE1(this.string)
+            return { type: 'prop', parameter }
+          }
+        }
+      ])
+    })
+
+    /**
+     * Consume an operator within selectors
+     * @method #selectionOperator
+     * @memberof module:kdljs.parser.kql.KqlParser
+     * @return {string}
+     */
+    this.RULE('selectionOperator', () => {
+      return this.OR([
+        { ALT: () => this.CONSUME(Tokens.Descendant) },
+        { ALT: () => this.CONSUME(Tokens.GreaterThan) },
+        { ALT: () => this.CONSUME(Tokens.AdjacentSibling) },
+        { ALT: () => this.CONSUME(Tokens.Sibling) }
+      ]).image
+    })
+
+    /**
+     * Consume an operator within matchers
+     * @method #matcherOperator
+     * @memberof module:kdljs.parser.kql.KqlParser
+     * @return {string}
+     */
+    this.RULE('matcherOperator', () => {
+      return this.OR([
+        { ALT: () => this.CONSUME(Tokens.GreaterThan) },
+        { ALT: () => this.CONSUME(Tokens.LessThan) },
+        { ALT: () => this.CONSUME(Tokens.GreaterOrEqualThan) },
+        { ALT: () => this.CONSUME(Tokens.LessOrEqualThan) },
+        { ALT: () => this.CONSUME(Tokens.Equals) },
+        { ALT: () => this.CONSUME(Tokens.NotEquals) },
+        { ALT: () => this.CONSUME(Tokens.StartsWith) },
+        { ALT: () => this.CONSUME(Tokens.EndsWith) },
+        { ALT: () => this.CONSUME(Tokens.Contains) }
+      ]).image
+    })
+
+    /**
+     * Consume a mapping
+     * @method #mapTuple
+     * @memberof module:kdljs.parser.kql.KqlParser
+     * @return {module:kdljs.query.Mapping}
+     */
+    this.RULE('mapTuple', () => {
+      return this.OR([
+        { ALT: () => this.SUBRULE(this.accessor) },
+        {
+          ALT: () => {
+            this.CONSUME(Tokens.LeftParenthesis)
+
+            const tuple = [this.SUBRULE1(this.accessor)]
+            this.MANY(() => {
+              this.CONSUME(Tokens.Comma)
+              this.CONSUME(Tokens.WhiteSpace)
+              tuple.push(this.SUBRULE2(this.accessor))
+            })
+
+            this.CONSUME(Tokens.RightParenthesis)
+            return tuple
+          }
+        }
+      ])
+    })
+
+    this.performSelfAnalysis()
+  }
+}
+
+const lexer = new Lexer(tokens)
+/**
+ * @constant {module:kdljs.parser.kql.KqlParser}
+ * @memberof module:kdljs.parser.kql
+ */
+const parser = new KqlParser()
+
+/**
+ * @typedef ParseResult
+ * @memberof module:kdljs.parser.kql
+ * @type {Object}
+ * @property {Array} errors - Parsing errors
+ * @property {module:kdljs.queryEngine.Query} output - KQL query
+ */
+
+/**
+ * @function parse
+ * @memberof module:kdljs.parser.kql
+ * @param {string} text - Input KQL file (or fragment)
+ * @return {module:kdljs.parser.kql.ParseResult} Output
+ */
+export function parse (text) {
+  parser.input = lexer.tokenize(text).tokens
+  const output = parser.query()
+
+  return {
+    output,
+    errors: parser.errors
+  }
+}
+
+export {
+  lexer,
+  parser,
+  KqlParser
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-kdljs.html">kdljs</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-kdljs.formatter.html">formatter</a></li><li><a href="module-kdljs.parser.html">parser</a></li><li><a href="module-kdljs.parser.base.html">base</a></li><li><a href="module-kdljs.parser.kdl.html">kdl</a></li><li><a href="module-kdljs.parser.kql.html">kql</a></li><li><a href="module-kdljs.queryEngine.html">queryEngine</a></li><li><a href="module-kdljs.validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-kdljs.parser.base.BaseParser.html">BaseParser</a></li><li><a href="module-kdljs.parser.kdl.KdlParser.html">KdlParser</a></li><li><a href="module-kdljs.parser.kql.KqlParser.html">KqlParser</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jan 08 2025 16:26:44 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

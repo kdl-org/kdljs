@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: formatter.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: formatter.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @namespace formatter
+ * @memberof module:kdljs
+ */
+
+import { validateDocument } from './validator.js'
+import { Identifier } from './parser/tokens.js'
+import { bannedIdentifiers } from './parser/base.js'
+
+/* eslint-disable no-control-regex */
+const linespace = /^[\r\n\u0085\u000C\u2028\u2029]$/
+const nonAscii = /^[^\x00-\x7F]$/
+const nonPrintableAscii = /^[\x00-\x19\x7F]$/
+/* eslint-enable no-control-regex */
+const commonEscapes = {
+  '\n': '\\n',
+  '\r': '\\r',
+  '\t': '\\t',
+  '\\': '\\\\',
+  '"': '\\"',
+  '\x08': '\\b',
+  '\x0C': '\\f'
+}
+
+const identifierPattern = new RegExp('^(' + Identifier.PATTERN.source + ')$')
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {string} char
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @return {boolean}
+ */
+function shouldEscapeChar (value, options) {
+  const charCode = value.charCodeAt(0)
+
+  if (options.escapes[charCode]) {
+    return true
+  } else if (value === '"' || value === '\\') {
+    return true
+  } else if (options.escapeCommon &amp;&amp; value in commonEscapes) {
+    return true
+  } else if (options.escapeNonPrintableAscii &amp;&amp; nonPrintableAscii.test(value)) {
+    return true
+  } else if (options.escapeLinespace &amp;&amp; linespace.test(value)) {
+    return true
+  } else if (options.escapeNonAscii &amp;&amp; nonAscii.test(value)) {
+    return true
+  } else {
+    return false
+  }
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {string} char
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @return {string}
+ */
+function formatChar (value, options) {
+  if (!shouldEscapeChar(value, options)) {
+    return value
+  } else if (value in commonEscapes) {
+    return commonEscapes[value]
+  } else {
+    return `\\u{${value.charCodeAt(0).toString(16)}}`
+  }
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {string} value
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @return {string}
+ */
+function formatString (value, options) {
+  if (options.preferIdentifierString &amp;&amp; identifierPattern.test(value) &amp;&amp; !bannedIdentifiers.has(value)) {
+    return value
+  }
+
+  return `"${[...value].map(char => formatChar(char, options)).join('')}"`
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {string} value
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @return {string}
+ */
+function formatIdentifier (value, options) {
+  return formatString(value, { ...options, preferIdentifierString: true })
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {number} value
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @return {string}
+ */
+function formatNumber (value, options) {
+  if (!Number.isFinite(value)) {
+    if (value === Number.POSITIVE_INFINITY) {
+      return '#inf'
+    } else if (value === Number.NEGATIVE_INFINITY) {
+      return '#-inf'
+    } else {
+      return '#nan'
+    }
+  }
+
+  if (options.exponentChar === 'E') {
+    return value.toString().toUpperCase()
+  } else {
+    return value.toString()
+  }
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {string} [value] - KDL tag
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @return {string}
+ */
+function formatTag (value, options) {
+  return value === undefined ? '' : '(' + formatIdentifier(value, options) + ')'
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {module:kdljs~Value} value - KDL value
+ * @param {string} [tag] - KDL tag
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @return {string}
+ */
+function formatValue (value, tag, options) {
+  if (typeof value === 'string') {
+    return formatTag(tag, options) + formatString(value, options)
+  } else if (typeof value === 'number') {
+    return formatTag(tag, options) + formatNumber(value, options)
+  } else {
+    return formatTag(tag, options) + '#' + value
+  }
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {string} key
+ * @param {module:kdljs~Value} value - KDL value
+ * @param {string} [tag] - KDL tag
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @return {string}
+ */
+function formatProperty (key, value, tag, options) {
+  return formatIdentifier(key, options) + '=' + formatValue(value, tag, options)
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {module:kdljs~Node} node - KDL node
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @param {number} indent
+ * @return {string}
+ */
+function formatNode (node, options, indent) {
+  let values = node.values
+  if (!options.printNullArgs) {
+    values = values.filter(value => value !== null)
+  }
+
+  let properties = Object.keys(node.properties).sort()
+  if (!options.printNullProps) {
+    properties = properties.filter(key => node.properties[key] !== null)
+  }
+
+  const currentIndent = options.indentChar.repeat(options.indent * indent)
+  const parts = [
+    currentIndent + formatTag(node.tags.name, options) + formatIdentifier(node.name, options),
+    ...values.map((value, index) => formatValue(value, node.tags.values[index], options)),
+    ...properties.map(key => formatProperty(key, node.properties[key], node.tags.properties[key], options))
+  ]
+
+  if (node.children.length) {
+    indent++
+    parts.push('{' + options.newline + formatDocument(node.children, options, indent) + options.newline + currentIndent + '}')
+    indent--
+  } else if (options.printEmptyChildren) {
+    parts.push('{}')
+  }
+
+  return options.requireSemicolons ? parts.join(' ') + ';' : parts.join(' ')
+}
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {module:kdljs~Document} doc - KDL document
+ * @param {module:kdljs/formatter.ProcessedOptions} options - Formatting options
+ * @param {number} indent
+ * @return {string}
+ */
+function formatDocument (doc, options, indent) {
+  const nodes = doc.map(node => formatNode(node, options, indent))
+
+  return nodes.join(options.newline)
+}
+
+/**
+ * @access private
+ * @typedef ProcessedOptions
+ * @memberof module:kdljs.formatter
+ * @type {Object}
+ * @property {Object&lt;number,boolean>} escapes
+ * @property {boolean} requireSemicolons
+ * @property {boolean} escapeNonAscii
+ * @property {boolean} escapeNonPrintableAscii
+ * @property {boolean} escapeCommon
+ * @property {boolean} escapeLinespace
+ * @property {string} newline
+ * @property {number} indent
+ * @property {string} indentChar
+ * @property {string} exponentChar
+ * @property {string} preferIdentifierString
+ * @property {boolean} printEmptyChildren
+ * @property {boolean} printNullArgs
+ * @property {boolean} printNullProps
+ */
+
+/**
+ * @access private
+ * @memberof module:kdljs.formatter
+ * @param {module:kdljs/formatter.Options} options - Formatting options
+ * @return {module:kdljs/formatter.ProcessedOptions}
+ */
+function processOptions (options) {
+  return {
+    escapes: {},
+    requireSemicolons: false,
+    escapeNonAscii: false,
+    escapeNonPrintableAscii: true,
+    escapeCommon: true,
+    escapeLinespace: true,
+    newline: '\n',
+    indent: 4,
+    indentChar: ' ',
+    exponentChar: 'E',
+    preferIdentifierString: false,
+    printEmptyChildren: false,
+    printNullArgs: true,
+    printNullProps: true,
+    ...options
+  }
+}
+
+/**
+ * @typedef Options
+ * @memberof module:kdljs.formatter
+ * @type {Object}
+ * @property {Object&lt;number,boolean>} [escapes={}] - A map of which characters to escape (by decimal codepoint)
+ * @property {boolean} [requireSemicolons=false] - Whether to print semicolons after each node
+ * @property {boolean} [escapeNonAscii=false] - Whether to escape any non-ASCII characters
+ * @property {boolean} [escapeNonPrintableAscii=true] - Whether to escape non-printable ASCII characters
+ * @property {boolean} [escapeCommon=true] - Whether to escape common characters (i.e. those with single-character escape codes)
+ * @property {boolean} [escapeLinespace=true] - Whether to escape linespace characters
+ * @property {string} [newline='\n'] - The newline character
+ * @property {number} [indent=4] - The number of characters (from `indentChar`) to indent each level with
+ * @property {string} [indentChar=' '] - What character to indent with
+ * @property {string} [exponentChar='E'] - What character to use for the exponent in floats (`e` or `E`)
+ * @property {boolean} [preferIdentifierString=false] - Whether to prefer identifier-style strings
+ * @property {boolean} [printEmptyChildren=false] - Whether to print empty brackets if a node has no children
+ * @property {boolean} [printNullArgs=true] - Whether to print `null` values
+ * @property {boolean} [printNullProps=true] - Whether to print properties with value `null`
+ */
+
+/**
+ * @function format
+ * @memberof module:kdljs.formatter
+ * @param {module:kdljs~Document} doc - Input KDL document
+ * @param {module:kdljs.formatter.Options} [options={}] - Formatting options
+ * @return {string} formatted KDL file
+ */
+export function format (doc, options) {
+  if (!validateDocument(doc)) {
+    throw new TypeError('Invalid KDL document')
+  }
+
+  const processsedOptions = processOptions(options || {})
+
+  return formatDocument(doc, processsedOptions, 0) + processsedOptions.newline
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-kdljs.html">kdljs</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-kdljs.formatter.html">formatter</a></li><li><a href="module-kdljs.parser.html">parser</a></li><li><a href="module-kdljs.parser.base.html">base</a></li><li><a href="module-kdljs.parser.kdl.html">kdl</a></li><li><a href="module-kdljs.parser.kql.html">kql</a></li><li><a href="module-kdljs.queryEngine.html">queryEngine</a></li><li><a href="module-kdljs.validator.html">validator</a></li></ul><h3>Classes</h3><ul><li><a href="module-kdljs.parser.base.BaseParser.html">BaseParser</a></li><li><a href="module-kdljs.parser.kdl.KdlParser.html">KdlParser</a></li><li><a href="module-kdljs.parser.kql.KqlParser.html">KqlParser</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Jan 08 2025 16:26:44 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
