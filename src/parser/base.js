@@ -79,14 +79,13 @@ class BaseParser extends EmbeddedActionsParser {
     })
 
     /**
-     * Consume a value
-     * @method #value
+     * Consume a non-string value
+     * @method #nonStringValue
      * @memberof module:kdljs.parser.base.BaseParser
      * @return {module:kdljs~Value}
      */
-    this.RULE('value', () => {
+    this.RULE('nonStringValue', () => {
       return this.OR([
-        { ALT: () => this.SUBRULE(this.string) },
         { ALT: () => this.CONSUME(Tokens.Boolean).image === '#true' },
         {
           ALT: () => {
@@ -114,6 +113,19 @@ class BaseParser extends EmbeddedActionsParser {
             return sign * parseInt(number.slice(1), radix[number[0]])
           }
         }
+      ])
+    })
+
+    /**
+     * Consume a value
+     * @method #value
+     * @memberof module:kdljs.parser.base.BaseParser
+     * @return {module:kdljs~Value}
+     */
+    this.RULE('value', () => {
+      return this.OR([
+        { ALT: () => this.SUBRULE(this.string) },
+        { ALT: () => this.SUBRULE(this.nonStringValue) }
       ])
     })
 
@@ -376,12 +388,15 @@ class BaseParser extends EmbeddedActionsParser {
      * Consume node space
      * @method #nodeSpace
      * @memberof module:kdljs.parser.kdl.BaseParser
+     * @returns {boolean}
      */
     this.RULE('nodeSpace', () => {
       this.AT_LEAST_ONE(() => this.OR([
         { ALT: () => this.SUBRULE(this.whiteSpace) },
         { ALT: () => this.SUBRULE(this.lineContinuation) }
       ]))
+
+      return true
     })
 
     /**
