@@ -143,26 +143,24 @@ class KdlParser extends BaseParser {
       let entriesEnded = false
       let childrenEnded = false
 
-      this.MANY({
-        GATE: () => !nodeEndTokens.has(this.LA(1).tokenType),
-        DEF: () => {
-          this.SUBRULE1(this.nodeSpace)
+      let hasSpace = this.OPTION2(() => this.SUBRULE1(this.nodeSpace))
 
+      this.MANY({
+        GATE: () => hasSpace && !nodeEndTokens.has(this.LA(1).tokenType),
+        DEF: () => {
           this.OR([
             {
-              GATE: () => !entriesEnded && this.BACKTRACK(this.property).call(this),
+              GATE: () => !entriesEnded,
               ALT: () => {
-                const parts = this.SUBRULE(this.property)
-                node.properties[parts[0]] = parts[1]
-                node.tags.properties[parts[0]] = parts[2]
-              }
-            },
-            {
-              GATE: () => !entriesEnded && this.BACKTRACK(this.argument).call(this),
-              ALT: () => {
-                const parts = this.SUBRULE(this.argument)
-                node.values.push(parts[0])
-                node.tags.values.push(parts[1])
+                const parts = this.SUBRULE(this.propertyOrArgument)
+                if (parts[0] != null) {
+                  node.properties[parts[0]] = parts[1]
+                  node.tags.properties[parts[0]] = parts[2]
+                } else {
+                  node.values.push(parts[1])
+                  node.tags.values.push(parts[2])
+                }
+                hasSpace = parts[3]
               }
             },
             {
@@ -171,33 +169,30 @@ class KdlParser extends BaseParser {
                 node.children = this.SUBRULE(this.nodeChildren)
                 entriesEnded = true
                 childrenEnded = true
+                hasSpace = this.OPTION3(() => this.SUBRULE2(this.nodeSpace))
               }
             },
             {
               ALT: () => {
                 this.CONSUME(Tokens.BlockComment)
-                this.OPTION2(() => this.SUBRULE(this.lineSpace))
+                this.OPTION4(() => this.SUBRULE(this.lineSpace))
                 this.OR1([
                   {
-                    GATE: () => !entriesEnded && this.BACKTRACK(this.property).call(this),
-                    ALT: () => this.SUBRULE1(this.property)
-                  },
-                  {
-                    GATE: () => !entriesEnded && this.BACKTRACK(this.argument).call(this),
-                    ALT: () => this.SUBRULE1(this.argument)
+                    GATE: () => !entriesEnded,
+                    ALT: () => {
+                      const parts = this.SUBRULE1(this.propertyOrArgument)
+                      hasSpace = parts[3]
+                    }
                   },
                   {
                     ALT: () => {
                       this.SUBRULE1(this.nodeChildren)
                       entriesEnded = true
+                      hasSpace = this.OPTION5(() => this.SUBRULE3(this.nodeSpace))
                     }
                   }
                 ])
               }
-            },
-            {
-              GATE: () => nodeEndTokens.has(this.LA(1).tokenType),
-              ALT: () => {}
             }
           ])
         }
@@ -211,34 +206,57 @@ class KdlParser extends BaseParser {
     })
 
     /**
-     * Consume a property
-     * @method #property
+     * Consume a property or an argument
+     * @method #propertyOrArgument
      * @memberof module:kdljs.parser.kdl.KdlParser
      * @return {Array<module:kdljs~Value>} key-value-type tuple
      */
-    this.RULE('property', () => {
-      const key = this.SUBRULE(this.string)
-      this.OPTION(() => this.SUBRULE(this.nodeSpace))
-      this.CONSUME(Tokens.Equals)
-      this.OPTION1(() => this.SUBRULE1(this.nodeSpace))
-      const parts = this.SUBRULE(this.argument)
-      return [key, parts[0], parts[1]]
-    })
+    this.RULE('propertyOrArgument', () => {
+      return this.OR([
+        {
+          ALT: () => {
+            const tag = this.SUBRULE(this.tag)
+            this.OPTION(() => this.SUBRULE(this.nodeSpace))
+            const value = this.SUBRULE(this.value)
+            const hasSpaceAfter = this.OPTION1(() => this.SUBRULE1(this.nodeSpace))
+            return [undefined, value, tag, hasSpaceAfter]
+          }
+        },
+        {
+          ALT: () => {
+            const value = this.SUBRULE(this.nonStringValue)
+            const hasSpaceAfter = this.OPTION2(() => this.SUBRULE2(this.nodeSpace))
+            return [undefined, value, undefined, hasSpaceAfter]
+          }
+        },
+        {
+          ALT: () => {
+            let name
+            let tag
 
-    /**
-     * Consume an argument
-     * @method #argument
-     * @memberof module:kdljs.parser.kdl.KdlParser
-     * @return {Array<module:kdljs~Value>} value-type tuple
-     */
-    this.RULE('argument', () => {
-      const tag = this.OPTION(() => {
-        const tag = this.SUBRULE(this.tag)
-        this.OPTION1(() => this.SUBRULE(this.nodeSpace))
-        return tag
-      })
-      const value = this.SUBRULE(this.value)
-      return [value, tag]
+            let value = this.SUBRULE(this.string)
+            let hasSpaceAfter = this.OPTION3(() => this.SUBRULE3(this.nodeSpace))
+
+            this.OPTION4(() => {
+              this.CONSUME(Tokens.Equals)
+              this.OPTION5(() => this.SUBRULE4(this.nodeSpace))
+
+              name = value
+
+              tag = this.OPTION6(() => {
+                const tag = this.SUBRULE1(this.tag)
+                this.OPTION7(() => this.SUBRULE5(this.nodeSpace))
+                return tag
+              })
+
+              value = this.SUBRULE1(this.value)
+              hasSpaceAfter = this.OPTION8(() => this.SUBRULE6(this.nodeSpace))
+            })
+
+            return [name, value, tag, hasSpaceAfter]
+          }
+        }
+      ])
     })
 
     /**
