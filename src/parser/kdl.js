@@ -60,6 +60,11 @@ const tokens = {
   }
 }
 
+const noSpaceNeededTokens = new Set([
+  Tokens.LeftBrace,
+  Tokens.BlockComment
+])
+
 const nodeEndTokens = new Set([
   Tokens.RightBrace,
   Tokens.LineComment,
@@ -146,11 +151,14 @@ class KdlParser extends BaseParser {
       let hasSpace = this.OPTION2(() => this.SUBRULE1(this.nodeSpace))
 
       this.MANY({
-        GATE: () => hasSpace && !nodeEndTokens.has(this.LA(1).tokenType),
+        // Children blocks and slashdashes do not need node-space before them,
+        // properties and arguments do.
+        GATE: () => !nodeEndTokens.has(this.LA(1).tokenType) &&
+          (hasSpace || noSpaceNeededTokens.has(this.LA(1).tokenType)),
         DEF: () => {
           this.OR([
             {
-              GATE: () => !entriesEnded,
+              GATE: () => !entriesEnded && hasSpace,
               ALT: () => {
                 const parts = this.SUBRULE(this.propertyOrArgument)
                 if (parts[0] != null) {
